@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# 运行时产物（体检过程中生成的临时数据）
+inspector-out/
+_test/
+*.log
+
+# 本地环境与工具数据
+.workbuddy/
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# 安装包走 GitHub Release，不入库
+*.zip

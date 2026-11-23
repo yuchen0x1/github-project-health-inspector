@@ -1,0 +1,2707 @@
+{
+  "inspector": {
+    "version": "1.0.0",
+    "generated_at": "2026-11-23T10:21:37Z",
+    "host": "workbuddy",
+    "python": "3.13.14"
+  },
+  "input": {
+    "raw": "https://github.com/pallets/flask",
+    "owner": "pallets",
+    "repo": "flask",
+    "ref": null,
+    "host": "github.com",
+    "input": "https://github.com/pallets/flask"
+  },
+  "access": {
+    "limitations": [
+      "GitHub API 剩余配额仅 7 次；如需完整数据请设置 GITHUB_TOKEN。",
+      "当前为匿名访问（60 次/小时）。部分列表接口只抽样前 100~200 条，报告中的 issue/PR 计数为抽样值，需与 open_issues_count 区分。",
+      "代码层分析在与 GitHub 元数据同一份浅克隆上重跑（uv.lock/许可证解析修复后），二者 commit 一致。"
+    ],
+    "api_calls": 12,
+    "source_method": "git-clone",
+    "clone": {
+      "method": "git-clone",
+      "ok": true,
+      "error": null,
+      "path": "C:\\Users\\lenmo\\Desktop\\GitHub 项目全方位体检专家\\_test\\flask\\repo",
+      "ref": "main",
+      "size_mb": 1.74,
+      "commit": "49943b5a94413a530761350f04e896f76e8d620e",
+      "elapsed_s": 16.2,
+      "branch": "main"
+    },
+    "files": {
+      "file_count": 236,
+      "bytes_scanned": 1473079,
+      "skipped_dirs": [
+        ".git"
+      ],
+      "truncated": false
+    },
+    "rate_limit": {
+      "remaining": 7,
+      "limit": 10,
+      "reset": 1795429388,
+      "authenticated": false
+    },
+    "code_layer": "local clone re-analysis (same repo, same commit 49943b5)"
+  },
+  "repository": {
+    "repo": "pallets/flask",
+    "unavailable": [],
+    "meta": {
+      "full_name": "pallets/flask",
+      "description": "The Python micro framework for building web applications.",
+      "html_url": "https://github.com/pallets/flask",
+      "homepage": "https://flask.palletsprojects.com",
+      "default_branch": "main",
+      "created_at": "2010-04-06T11:11:59Z",
+      "updated_at": "2026-11-23T10:10:02Z",
+      "pushed_at": "2026-10-30T15:05:22Z",
+      "stars": 75352,
+      "forks": 17299,
+      "watchers": 2157,
+      "open_issues_count": 4,
+      "size_kb": 12227,
+      "language": "Python",
+      "topics": [
+        "flask",
+        "jinja",
+        "pallets",
+        "python",
+        "web-framework",
+        "werkzeug",
+        "wsgi"
+      ],
+      "archived": false,
+      "disabled": false,
+      "is_fork": false,
+      "has_issues": true,
+      "has_wiki": false,
+      "has_discussions": false,
+      "license": "BSD-3-Clause",
+      "network_count": 17299
+    },
+    "age_days": 6074,
+    "days_since_last_push": 23,
+    "languages_api": [
+      {
+        "language": "Python",
+        "pct": 99.9
+      },
+      {
+        "language": "HTML",
+        "pct": 0.1
+      },
+      {
+        "language": "Shell",
+        "pct": 0.0
+      },
+      {
+        "language": "CSS",
+        "pct": 0.0
+      }
+    ],
+    "issues": {
+      "open_sampled": 1,
+      "open_total_reported": 4,
+      "stale_180d_sampled": 0,
+      "top_labels": [],
+      "oldest_open": [
+        {
+          "number": 6146,
+          "title": "Add Cloudflare to Flask Hosting Platforms docs?",
+          "created_at": "2026-08-31T19:17:12Z",
+          "comments": 5
+        }
+      ],
+      "most_commented": [
+        {
+          "number": 6146,
+          "title": "Add Cloudflare to Flask Hosting Platforms docs?",
+          "comments": 5
+        }
+      ]
+    },
+    "pulls": {
+      "open_sampled": 3,
+      "list": [
+        {
+          "number": 5918,
+          "title": "automatic options as separate route",
+          "created_at": "2026-02-12T22:03:40Z",
+          "draft": false,
+          "user": "davidism"
+        },
+        {
+          "number": 5665,
+          "title": "Workflow",
+          "created_at": "2025-01-02T21:10:36Z",
+          "draft": false,
+          "user": "pgjones"
+        },
+        {
+          "number": 5660,
+          "title": "Move parts of the session code to sansio",
+          "created_at": "2024-12-24T20:09:08Z",
+          "draft": false,
+          "user": "pgjones"
+        }
+      ]
+    },
+    "commits": {
+      "sampled": 100,
+      "top_authors": [
+        [
+          "David Lord",
+          92
+        ],
+        [
+          "lkk7",
+          2
+        ],
+        [
+          "Markus Heidelberg",
+          2
+        ],
+        [
+          "Michał Górny",
+          1
+        ],
+        [
+          "Christian Clauss",
+          1
+        ],
+        [
+          "ADITYA SAH",
+          1
+        ],
+        [
+          "Hynek Schlawack",
+          1
+        ]
+      ],
+      "unique_authors_sampled": 7,
+      "latest": "2026-10-30T15:05:20Z",
+      "monthly_counts": {
+        "2025-09": 1,
+        "2025-10": 1,
+        "2025-11": 9,
+        "2025-12": 1,
+        "2026-01": 21,
+        "2026-02": 17,
+        "2026-03": 8,
+        "2026-04": 7,
+        "2026-05": 8,
+        "2026-06": 1,
+        "2026-07": 7,
+        "2026-08": 9,
+        "2026-09": 1,
+        "2026-10": 9
+      },
+      "last_90d_count": 10
+    },
+    "releases": {
+      "count_sampled": 38,
+      "latest": {
+        "tag": "3.1.3",
+        "name": "",
+        "published_at": "2026-02-19T05:01:30Z",
+        "prerelease": false
+      },
+      "recent": [
+        {
+          "tag": "3.1.3",
+          "published_at": "2026-02-19T05:01:30Z"
+        },
+        {
+          "tag": "3.1.2",
+          "published_at": "2025-08-19T21:03:31Z"
+        },
+        {
+          "tag": "3.1.1",
+          "published_at": "2025-05-13T15:01:32Z"
+        },
+        {
+          "tag": "3.1.0",
+          "published_at": "2024-11-13T18:29:05Z"
+        },
+        {
+          "tag": "3.0.3",
+          "published_at": "2024-04-07T19:27:16Z"
+        },
+        {
+          "tag": "3.0.2",
+          "published_at": "2024-02-03T21:12:56Z"
+        },
+        {
+          "tag": "3.0.1",
+          "published_at": "2024-01-18T20:03:56Z"
+        },
+        {
+          "tag": "3.0.0",
+          "published_at": "2023-09-30T14:38:50Z"
+        },
+        {
+          "tag": "2.3.3",
+          "published_at": "2023-08-21T19:52:49Z"
+        },
+        {
+          "tag": "2.2.5",
+          "published_at": "2023-05-02T14:43:59Z"
+        },
+        {
+          "tag": "2.3.2",
+          "published_at": "2023-05-01T15:43:14Z"
+        },
+        {
+          "tag": "2.3.1",
+          "published_at": "2023-04-25T21:22:11Z"
+        }
+      ],
+      "days_since_latest": 277
+    },
+    "contributors": {
+      "count_sampled": 100,
+      "top": [
+        {
+          "login": "davidism",
+          "contributions": 1865,
+          "pct": 40.9
+        },
+        {
+          "login": "mitsuhiko",
+          "contributions": 1189,
+          "pct": 26.1
+        },
+        {
+          "login": "untitaker",
+          "contributions": 274,
+          "pct": 6.0
+        },
+        {
+          "login": "rduplain",
+          "contributions": 122,
+          "pct": 2.7
+        },
+        {
+          "login": "greyli",
+          "contributions": 105,
+          "pct": 2.3
+        },
+        {
+          "login": "dependabot-preview[bot]",
+          "contributions": 91,
+          "pct": 2.0
+        },
+        {
+          "login": "DasIch",
+          "contributions": 86,
+          "pct": 1.9
+        },
+        {
+          "login": "dependabot[bot]",
+          "contributions": 61,
+          "pct": 1.3
+        },
+        {
+          "login": "kennethreitz",
+          "contributions": 59,
+          "pct": 1.3
+        },
+        {
+          "login": "pgjones",
+          "contributions": 50,
+          "pct": 1.1
+        }
+      ],
+      "bus_factor": 3,
+      "bus_factor_note": "贡献占比 >5% 的人数（近似 bus factor，仅供参考）"
+    },
+    "branches": {
+      "count_sampled": 4,
+      "names": [
+        "automatic-options",
+        "main",
+        "stable",
+        "workflow"
+      ]
+    },
+    "community": {
+      "health_percentage": 87,
+      "files": {
+        "code_of_conduct": {
+          "key": "contributor_covenant",
+          "name": "Contributor Covenant",
+          "html_url": "https://github.com/pallets/.github/blob/main/CODE_OF_CONDUCT.md",
+          "url": "https://api.github.com/repos/pallets/flask/community/code_of_conduct"
+        },
+        "code_of_conduct_file": {
+          "url": "https://api.github.com/repos/pallets/.github/contents/CODE_OF_CONDUCT.md",
+          "html_url": "https://github.com/pallets/.github/blob/main/CODE_OF_CONDUCT.md"
+        },
+        "contributing": {
+          "url": "https://api.github.com/repos/pallets/flask/contents/docs/contributing.rst",
+          "html_url": "https://github.com/pallets/flask/blob/main/docs/contributing.rst"
+        },
+        "issue_template": null,
+        "pull_request_template": {
+          "url": "https://api.github.com/repos/pallets/flask/contents/.github/pull_request_template.md",
+          "html_url": "https://github.com/pallets/flask/blob/main/.github/pull_request_template.md"
+        },
+        "license": {
+          "key": "bsd-3-clause",
+          "name": "BSD 3-Clause \"New\" or \"Revised\" License",
+          "spdx_id": "BSD-3-Clause",
+          "url": "https://api.github.com/licenses/bsd-3-clause",
+          "node_id": "MDc6TGljZW5zZTU=",
+          "html_url": "https://github.com/pallets/flask/blob/main/LICENSE.txt"
+        },
+        "readme": {
+          "url": "https://api.github.com/repos/pallets/flask/contents/README.md",
+          "html_url": "https://github.com/pallets/flask/blob/main/README.md"
+        }
+      }
+    },
+    "rate_limit": {
+      "remaining": 7,
+      "limit": 10,
+      "reset": 1795429388,
+      "authenticated": false
+    },
+    "api_calls_used": 9,
+    "api_notes": []
+  },
+  "stack": {
+    "languages": [
+      {
+        "language": "Python",
+        "files": 83,
+        "bytes": 609647,
+        "pct_code": 100.0,
+        "pct_all_files": 35.2
+      }
+    ],
+    "build_systems": [
+      {
+        "file": "requirements.txt",
+        "system": "pip"
+      },
+      {
+        "file": "pyproject.toml",
+        "system": "Python (PEP 621/Poetry)"
+      },
+      {
+        "file": "Makefile",
+        "system": "Make"
+      }
+    ],
+    "frameworks": [
+      {
+        "name": "Flask",
+        "signal": "flask",
+        "confidence": "high"
+      },
+      {
+        "name": "Celery",
+        "signal": "celery",
+        "confidence": "high"
+      },
+      {
+        "name": "pytest",
+        "signal": "pytest",
+        "confidence": "high"
+      },
+      {
+        "name": "Click",
+        "signal": "click",
+        "confidence": "high"
+      }
+    ],
+    "project_types": [
+      "web-backend",
+      "cli",
+      "library"
+    ],
+    "monorepo": {
+      "detected": false,
+      "signals": [],
+      "packages": []
+    },
+    "entrypoints": [
+      "src/flask/sansio/app.py",
+      "src/flask/app.py",
+      "tests/test_apps/cliapp/app.py"
+    ],
+    "standard_files": {
+      "readme": "README.md",
+      "license": "LICENSE.txt",
+      "changelog": "CHANGES.rst",
+      "contributing": "docs/contributing.rst",
+      "code_of_conduct": null,
+      "security_policy": null,
+      "gitignore": ".gitignore",
+      "editorconfig": ".editorconfig",
+      "dockerfile": null,
+      "makefile": "Makefile",
+      "github_workflows": 5,
+      "issue_templates": 3,
+      "pr_template": true,
+      "dependabot": false,
+      "renovate": false
+    },
+    "license_detected": "BSD-3-Clause",
+    "dependency_count": 113,
+    "dependencies": [
+      {
+        "ecosystem": "PyPI",
+        "name": "alabaster",
+        "version": "1.0.0",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "anyio",
+        "version": "4.14.2",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "asgiref",
+        "version": "3.12.1",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "ast-serialize",
+        "version": "0.6.0",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "babel",
+        "version": "2.18.0",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "blinker",
+        "version": "1.9.0",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "==1.6.2",
+        "scope": "project",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "cachetools",
+        "version": "7.1.6",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "certifi",
+        "version": "2026.7.22",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "cffi",
+        "version": "2.1.0",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "cfgv",
+        "version": "3.5.0",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "charset-normalizer",
+        "version": "3.4.9",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "click",
+        "version": "8.4.2",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "==8.1.3",
+        "scope": "project",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "colorama",
+        "version": "0.4.6",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "cryptography",
+        "version": "49.0.0",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "distlib",
+        "version": "0.4.3",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "docutils",
+        "version": "0.21.2",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "filelock",
+        "version": "3.32.2",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "flask",
+        "version": "3.2.0.dev0",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "==2.3.2",
+        "scope": "project",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "gha-update",
+        "version": "0.2.0",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "h11",
+        "version": "0.16.0",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "httpcore",
+        "version": "1.0.9",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "httpx",
+        "version": "0.28.1",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "identify",
+        "version": "2.6.19",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "idna",
+        "version": "3.18",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "imagesize",
+        "version": "2.0.0",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "iniconfig",
+        "version": "2.3.0",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "itsdangerous",
+        "version": "2.2.0",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "==2.1.2",
+        "scope": "project",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "jinja2",
+        "version": "3.1.6",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "==3.1.2",
+        "scope": "project",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "librt",
+        "version": "0.13.0",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "markupsafe",
+        "version": "3.0.3",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "==2.1.2",
+        "scope": "project",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "mypy",
+        "version": "2.3.0",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "mypy-extensions",
+        "version": "1.1.0",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "nodeenv",
+        "version": "1.10.0",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "packaging",
+        "version": "26.2",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "pallets-sphinx-themes",
+        "version": "2.5.0",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "pathspec",
+        "version": "1.1.1",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "platformdirs",
+        "version": "4.11.0",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "pluggy",
+        "version": "1.6.0",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "pre-commit",
+        "version": "4.6.1",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "pre-commit-uv",
+        "version": "4.3.0",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "pycparser",
+        "version": "3.0",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "pygments",
+        "version": "2.20.0",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "pyproject-api",
+        "version": "1.11.0",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "pyright",
+        "version": "1.1.411",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "pytest",
+        "version": "9.1.1",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "python-discovery",
+        "version": "1.5.0",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "python-dotenv",
+        "version": "1.2.2",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "pyyaml",
+        "version": "6.0.3",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "requests",
+        "version": "2.34.2",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "roman-numerals",
+        "version": "4.1.0",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "roman-numerals-py",
+        "version": "4.1.0",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "ruff",
+        "version": "0.16.0",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "snowballstemmer",
+        "version": "3.1.1",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "sphinx",
+        "version": "8.2.3",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "<9",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "sphinx-autobuild",
+        "version": "2025.8.25",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "sphinx-notfound-page",
+        "version": "1.1.0",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "sphinx-tabs",
+        "version": "3.5.0",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "sphinxcontrib-applehelp",
+        "version": "2.0.0",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "sphinxcontrib-devhelp",
+        "version": "2.0.0",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "sphinxcontrib-htmlhelp",
+        "version": "2.1.0",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "sphinxcontrib-jsmath",
+        "version": "1.0.1",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "sphinxcontrib-log-cabinet",
+        "version": "1.0.1",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "sphinxcontrib-qthelp",
+        "version": "2.0.0",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "sphinxcontrib-serializinghtml",
+        "version": "2.0.0",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "starlette",
+        "version": "1.3.1",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "tomli-w",
+        "version": "1.2.0",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "tox",
+        "version": "4.58.0",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "tox-uv",
+        "version": "1.36.0",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "tox-uv-bare",
+        "version": "1.36.0",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "types-contextvars",
+        "version": "2.4.7.3",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "types-dataclasses",
+        "version": "0.6.6",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "typing-extensions",
+        "version": "4.16.0",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "urllib3",
+        "version": "2.7.0",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "uv",
+        "version": "0.12.0",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "uvicorn",
+        "version": "0.52.0",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "virtualenv",
+        "version": "21.7.1",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "watchfiles",
+        "version": "1.2.0",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "websockets",
+        "version": "17.0",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "",
+        "scope": "project",
+        "direct": false
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "werkzeug",
+        "version": "3.1.8",
+        "source_file": "uv.lock",
+        "pinned": true,
+        "constraint": "==2.3.3",
+        "scope": "project",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "amqp",
+        "version": "5.1.1",
+        "source_file": "examples/celery/requirements.txt",
+        "pinned": true,
+        "constraint": "==5.1.1",
+        "scope": "example_or_test",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "async-timeout",
+        "version": "4.0.2",
+        "source_file": "examples/celery/requirements.txt",
+        "pinned": true,
+        "constraint": "==4.0.2",
+        "scope": "example_or_test",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "billiard",
+        "version": "3.6.4.0",
+        "source_file": "examples/celery/requirements.txt",
+        "pinned": true,
+        "constraint": "==3.6.4.0",
+        "scope": "example_or_test",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "celery",
+        "version": "5.2.7",
+        "source_file": "examples/celery/requirements.txt",
+        "pinned": true,
+        "constraint": "==5.2.7",
+        "scope": "example_or_test",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "click-didyoumean",
+        "version": "0.3.0",
+        "source_file": "examples/celery/requirements.txt",
+        "pinned": true,
+        "constraint": "==0.3.0",
+        "scope": "example_or_test",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "click-plugins",
+        "version": "1.1.1",
+        "source_file": "examples/celery/requirements.txt",
+        "pinned": true,
+        "constraint": "==1.1.1",
+        "scope": "example_or_test",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "click-repl",
+        "version": "0.2.0",
+        "source_file": "examples/celery/requirements.txt",
+        "pinned": true,
+        "constraint": "==0.2.0",
+        "scope": "example_or_test",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "kombu",
+        "version": "5.2.4",
+        "source_file": "examples/celery/requirements.txt",
+        "pinned": true,
+        "constraint": "==5.2.4",
+        "scope": "example_or_test",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "prompt-toolkit",
+        "version": "3.0.38",
+        "source_file": "examples/celery/requirements.txt",
+        "pinned": true,
+        "constraint": "==3.0.38",
+        "scope": "example_or_test",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "pytz",
+        "version": "2023.3",
+        "source_file": "examples/celery/requirements.txt",
+        "pinned": true,
+        "constraint": "==2023.3",
+        "scope": "example_or_test",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "redis",
+        "version": "4.5.4",
+        "source_file": "examples/celery/requirements.txt",
+        "pinned": true,
+        "constraint": "==4.5.4",
+        "scope": "example_or_test",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "six",
+        "version": "1.16.0",
+        "source_file": "examples/celery/requirements.txt",
+        "pinned": true,
+        "constraint": "==1.16.0",
+        "scope": "example_or_test",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "vine",
+        "version": "5.0.0",
+        "source_file": "examples/celery/requirements.txt",
+        "pinned": true,
+        "constraint": "==5.0.0",
+        "scope": "example_or_test",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "wcwidth",
+        "version": "0.2.6",
+        "source_file": "examples/celery/requirements.txt",
+        "pinned": true,
+        "constraint": "==0.2.6",
+        "scope": "example_or_test",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "CHANGES.rst",
+        "version": "",
+        "source_file": "pyproject.toml",
+        "pinned": false,
+        "constraint": "",
+        "scope": "project",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "uv.lock",
+        "version": "",
+        "source_file": "pyproject.toml",
+        "pinned": false,
+        "constraint": "",
+        "scope": "project",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "error",
+        "version": "",
+        "source_file": "pyproject.toml",
+        "pinned": false,
+        "constraint": "",
+        "scope": "project",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "importlib_metadata",
+        "version": "",
+        "source_file": "pyproject.toml",
+        "pinned": false,
+        "constraint": "",
+        "scope": "project",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "B",
+        "version": "",
+        "source_file": "pyproject.toml",
+        "pinned": false,
+        "constraint": "",
+        "scope": "project",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "E",
+        "version": "",
+        "source_file": "pyproject.toml",
+        "pinned": false,
+        "constraint": "",
+        "scope": "project",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "F",
+        "version": "",
+        "source_file": "pyproject.toml",
+        "pinned": false,
+        "constraint": "",
+        "scope": "project",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "I",
+        "version": "",
+        "source_file": "pyproject.toml",
+        "pinned": false,
+        "constraint": "",
+        "scope": "project",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "UP",
+        "version": "",
+        "source_file": "pyproject.toml",
+        "pinned": false,
+        "constraint": "",
+        "scope": "project",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "W",
+        "version": "",
+        "source_file": "pyproject.toml",
+        "pinned": false,
+        "constraint": "",
+        "scope": "project",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "py3.15",
+        "version": "",
+        "source_file": "pyproject.toml",
+        "pinned": false,
+        "constraint": "",
+        "scope": "project",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "py3.14",
+        "version": "",
+        "source_file": "pyproject.toml",
+        "pinned": false,
+        "constraint": "",
+        "scope": "project",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "py3.13",
+        "version": "",
+        "source_file": "pyproject.toml",
+        "pinned": false,
+        "constraint": "",
+        "scope": "project",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "pypy3.11",
+        "version": "",
+        "source_file": "pyproject.toml",
+        "pinned": false,
+        "constraint": "",
+        "scope": "project",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "tests-min",
+        "version": "",
+        "source_file": "pyproject.toml",
+        "pinned": false,
+        "constraint": "",
+        "scope": "project",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "style",
+        "version": "",
+        "source_file": "pyproject.toml",
+        "pinned": false,
+        "constraint": "",
+        "scope": "project",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "typing",
+        "version": "",
+        "source_file": "pyproject.toml",
+        "pinned": false,
+        "constraint": "",
+        "scope": "project",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "docs",
+        "version": "",
+        "source_file": "pyproject.toml",
+        "pinned": false,
+        "constraint": "",
+        "scope": "project",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "requires-python",
+        "version": "",
+        "source_file": "pyproject.toml",
+        "pinned": false,
+        "constraint": ">=3.11",
+        "scope": "project",
+        "direct": true
+      },
+      {
+        "ecosystem": "PyPI",
+        "name": "python_version",
+        "version": "",
+        "source_file": "pyproject.toml",
+        "pinned": false,
+        "constraint": "3.11",
+        "scope": "project",
+        "direct": true
+      }
+    ],
+    "top_dirs": [
+      ".devcontainer",
+      ".github",
+      "docs",
+      "examples",
+      "src",
+      "tests"
+    ]
+  },
+  "structure": {
+    "depth_max": 7,
+    "depth_histogram": {
+      "0": 9,
+      "1": 57,
+      "2": 103,
+      "3": 33,
+      "4": 12,
+      "5": 10,
+      "6": 1,
+      "7": 3
+    },
+    "top_layout": [
+      {
+        "dir": "docs",
+        "files": 79,
+        "bytes": 464825
+      },
+      {
+        "dir": "tests",
+        "files": 61,
+        "bytes": 226060
+      },
+      {
+        "dir": "examples",
+        "files": 42,
+        "bytes": 44386
+      },
+      {
+        "dir": "src",
+        "files": 26,
+        "bytes": 360149
+      },
+      {
+        "dir": ".github",
+        "files": 9,
+        "bytes": 9522
+      },
+      {
+        "dir": ".devcontainer",
+        "files": 2,
+        "bytes": 623
+      }
+    ],
+    "large_files": [],
+    "duplicate_filename_groups": [
+      {
+        "name": "views.py",
+        "copies": [
+          "examples/celery/src/task_app/views.py",
+          "examples/javascript/js_example/views.py",
+          "src/flask/views.py"
+        ]
+      },
+      {
+        "name": "app.py",
+        "copies": [
+          "src/flask/app.py",
+          "src/flask/sansio/app.py",
+          "tests/test_apps/cliapp/app.py"
+        ]
+      }
+    ],
+    "stale_file_hints": [],
+    "test_file_count": 69,
+    "code_file_count": 36,
+    "test_to_code_ratio_pct": 191.7,
+    "test_frameworks": [
+      "pytest"
+    ],
+    "ci_workflows": 5
+  },
+  "quality": {
+    "loc_total": 18483,
+    "loc_by_language": {
+      "Python": 18475,
+      "Shell": 8
+    },
+    "files_scanned_for_quality": 84,
+    "function_count_sampled": 1462,
+    "long_functions": [
+      {
+        "file": "src/flask/app.py",
+        "name": "run",
+        "line": 641,
+        "length": 124,
+        "complexity": 12,
+        "args": 5
+      },
+      {
+        "file": "src/flask/app.py",
+        "name": "url_for",
+        "line": 1145,
+        "length": 121,
+        "complexity": 13,
+        "args": 6
+      },
+      {
+        "file": "src/flask/app.py",
+        "name": "make_response",
+        "line": 1267,
+        "length": 141,
+        "complexity": 16,
+        "args": 2
+      },
+      {
+        "file": "src/flask/helpers.py",
+        "name": "send_file",
+        "line": 417,
+        "length": 124,
+        "complexity": 1,
+        "args": 8
+      },
+      {
+        "file": "src/flask/sansio/app.py",
+        "name": "__init__",
+        "line": 280,
+        "length": 130,
+        "complexity": 3,
+        "args": 11
+      },
+      {
+        "file": "src/flask/sansio/scaffold.py",
+        "name": "__init__",
+        "line": 75,
+        "length": 141,
+        "complexity": 2,
+        "args": 6
+      }
+    ],
+    "complex_functions": [
+      {
+        "file": "src/flask/app.py",
+        "name": "__init__",
+        "line": 308,
+        "length": 54,
+        "complexity": 3,
+        "args": 11
+      },
+      {
+        "file": "src/flask/app.py",
+        "name": "run",
+        "line": 641,
+        "length": 124,
+        "complexity": 12,
+        "args": 5
+      },
+      {
+        "file": "src/flask/app.py",
+        "name": "url_for",
+        "line": 1145,
+        "length": 121,
+        "complexity": 13,
+        "args": 6
+      },
+      {
+        "file": "src/flask/app.py",
+        "name": "make_response",
+        "line": 1267,
+        "length": 141,
+        "complexity": 16,
+        "args": 2
+      },
+      {
+        "file": "src/flask/blueprints.py",
+        "name": "__init__",
+        "line": 19,
+        "length": 35,
+        "complexity": 1,
+        "args": 11
+      },
+      {
+        "file": "src/flask/cli.py",
+        "name": "run_command",
+        "line": 934,
+        "length": 59,
+        "complexity": 5,
+        "args": 9
+      },
+      {
+        "file": "src/flask/helpers.py",
+        "name": "stream_with_context",
+        "line": 63,
+        "length": 86,
+        "complexity": 5,
+        "args": 1
+      },
+      {
+        "file": "src/flask/helpers.py",
+        "name": "send_file",
+        "line": 417,
+        "length": 124,
+        "complexity": 1,
+        "args": 8
+      },
+      {
+        "file": "src/flask/sansio/app.py",
+        "name": "__init__",
+        "line": 280,
+        "length": 130,
+        "complexity": 3,
+        "args": 11
+      },
+      {
+        "file": "src/flask/sansio/blueprints.py",
+        "name": "__init__",
+        "line": 174,
+        "length": 38,
+        "complexity": 4,
+        "args": 11
+      },
+      {
+        "file": "src/flask/sansio/blueprints.py",
+        "name": "register",
+        "line": 273,
+        "length": 105,
+        "complexity": 22,
+        "args": 3
+      },
+      {
+        "file": "src/flask/sansio/scaffold.py",
+        "name": "__init__",
+        "line": 75,
+        "length": 141,
+        "complexity": 2,
+        "args": 6
+      },
+      {
+        "file": "tests/test_basic.py",
+        "name": "test_session_accessed",
+        "line": 238,
+        "length": 40,
+        "complexity": 20,
+        "args": 2
+      },
+      {
+        "file": "tests/test_basic.py",
+        "name": "test_response_types",
+        "line": 1144,
+        "length": 92,
+        "complexity": 27,
+        "args": 2
+      },
+      {
+        "file": "tests/test_blueprints.py",
+        "name": "test_templates_and_static",
+        "line": 175,
+        "length": 44,
+        "complexity": 18,
+        "args": 1
+      },
+      {
+        "file": "tests/test_blueprints.py",
+        "name": "test_template_global",
+        "line": 711,
+        "length": 52,
+        "complexity": 19,
+        "args": 1
+      },
+      {
+        "file": "tests/test_cli.py",
+        "name": "test_find_best_app",
+        "line": 47,
+        "length": 85,
+        "complexity": 12,
+        "args": 1
+      },
+      {
+        "file": "tests/test_helpers.py",
+        "name": "test_static_file",
+        "line": 44,
+        "length": 39,
+        "complexity": 16,
+        "args": 3
+      },
+      {
+        "file": "tests/test_templating.py",
+        "name": "test_add_template_global",
+        "line": 359,
+        "length": 44,
+        "complexity": 17,
+        "args": 2
+      }
+    ],
+    "long_function_ratio_pct": 0.7,
+    "bare_except_count": 1,
+    "bare_except_samples": [
+      {
+        "file": "src/flask/app.py",
+        "line": 1662,
+        "code": "except:"
+      }
+    ],
+    "mutable_default_args": [],
+    "parse_errors": [],
+    "todo_count": 9,
+    "todo_by_kind": {
+      "XXX": 9
+    },
+    "todo_samples": [
+      {
+        "file": "tests/test_testing.py",
+        "line": 122,
+        "kind": "XXX",
+        "text": "\")"
+      },
+      {
+        "file": "tests/test_testing.py",
+        "line": 130,
+        "kind": "XXX",
+        "text": "\")"
+      },
+      {
+        "file": "tests/test_testing.py",
+        "line": 131,
+        "kind": "XXX",
+        "text": ".example.com:1234/foo/\""
+      },
+      {
+        "file": "tests/test_testing.py",
+        "line": 136,
+        "kind": "XXX",
+        "text": "\")"
+      },
+      {
+        "file": "tests/test_testing.py",
+        "line": 137,
+        "kind": "XXX",
+        "text": ".example.com:1234/foo/\""
+      },
+      {
+        "file": "tests/test_testing.py",
+        "line": 314,
+        "kind": "XXX",
+        "text": "\")"
+      },
+      {
+        "file": "tests/test_testing.py",
+        "line": 320,
+        "kind": "XXX",
+        "text": "\" == response.data"
+      },
+      {
+        "file": "tests/test_testing.py",
+        "line": 331,
+        "kind": "XXX",
+        "text": "\")"
+      },
+      {
+        "file": "tests/test_testing.py",
+        "line": 337,
+        "kind": "XXX",
+        "text": "\" == response.data"
+      }
+    ],
+    "commented_out_code_count": 14,
+    "commented_out_samples": [
+      {
+        "file": "src/flask/app.py",
+        "line": 293,
+        "text": "# class annotation"
+      },
+      {
+        "file": "src/flask/app.py",
+        "line": 721,
+        "text": "# if set, env var overrides existing value"
+      },
+      {
+        "file": "src/flask/app.py",
+        "line": 1012,
+        "text": "# if we provide automatic options for this URL and the"
+      },
+      {
+        "file": "src/flask/app.py",
+        "line": 1359,
+        "text": "# let the response class set the status and headers instead of"
+      },
+      {
+        "file": "src/flask/app.py",
+        "line": 1372,
+        "text": "# class to the correct type"
+      },
+      {
+        "file": "src/flask/testing.py",
+        "line": 231,
+        "text": "# from being preserved across redirects or multiple requests"
+      },
+      {
+        "file": "src/flask/views.py",
+        "line": 128,
+        "text": "# for testing purposes and debugging."
+      },
+      {
+        "file": "src/flask/wrappers.py",
+        "line": 254,
+        "text": "# return Werkzeug's default when not in an app context"
+      },
+      {
+        "file": "src/flask/sansio/app.py",
+        "line": 619,
+        "text": "# if the methods are not given and the view_func object knows its"
+      },
+      {
+        "file": "src/flask/sansio/app.py",
+        "line": 916,
+        "text": "# if unset, trap key errors in debug mode"
+      },
+      {
+        "file": "tests/test_basic.py",
+        "line": 1964,
+        "text": "# from freeing it when all external references to it are released (see #3761)."
+      },
+      {
+        "file": "tests/test_cli.py",
+        "line": 252,
+        "text": "# import app with module's absolute path"
+      },
+      {
+        "file": "tests/test_cli.py",
+        "line": 275,
+        "text": "# import app from wsgi.py in current directory"
+      },
+      {
+        "file": "tests/test_cli.py",
+        "line": 281,
+        "text": "# import app from app.py in current directory"
+      }
+    ],
+    "duplication": {
+      "duplicate_window_ratio_pct": 1.09,
+      "files_scanned": 81,
+      "sample_blocks": [
+        {
+          "occurrences": 3,
+          "locations": [
+            {
+              "file": "src/flask/sansio/app.py",
+              "line": 605
+            },
+            {
+              "file": "src/flask/sansio/blueprints.py",
+              "line": 412
+            },
+            {
+              "file": "src/flask/sansio/scaffold.py",
+              "line": 375
+            }
+          ]
+        },
+        {
+          "occurrences": 3,
+          "locations": [
+            {
+              "file": "src/flask/sansio/app.py",
+              "line": 606
+            },
+            {
+              "file": "src/flask/sansio/blueprints.py",
+              "line": 413
+            },
+            {
+              "file": "src/flask/sansio/scaffold.py",
+              "line": 376
+            }
+          ]
+        },
+        {
+          "occurrences": 3,
+          "locations": [
+            {
+              "file": "src/flask/sansio/app.py",
+              "line": 607
+            },
+            {
+              "file": "src/flask/sansio/blueprints.py",
+              "line": 414
+            },
+            {
+              "file": "src/flask/sansio/scaffold.py",
+              "line": 377
+            }
+          ]
+        },
+        {
+          "occurrences": 3,
+          "locations": [
+            {
+              "file": "src/flask/sansio/app.py",
+              "line": 608
+            },
+            {
+              "file": "src/flask/sansio/blueprints.py",
+              "line": 415
+            },
+            {
+              "file": "src/flask/sansio/scaffold.py",
+              "line": 378
+            }
+          ]
+        },
+        {
+          "occurrences": 2,
+          "locations": [
+            {
+              "file": "examples/tutorial/flaskr/auth.py",
+              "line": 3
+            },
+            {
+              "file": "examples/tutorial/flaskr/blog.py",
+              "line": 1
+            }
+          ]
+        },
+        {
+          "occurrences": 2,
+          "locations": [
+            {
+              "file": "src/flask/app.py",
+              "line": 63
+            },
+            {
+              "file": "src/flask/sansio/app.py",
+              "line": 44
+            }
+          ]
+        },
+        {
+          "occurrences": 2,
+          "locations": [
+            {
+              "file": "src/flask/app.py",
+              "line": 64
+            },
+            {
+              "file": "src/flask/sansio/app.py",
+              "line": 45
+            }
+          ]
+        },
+        {
+          "occurrences": 2,
+          "locations": [
+            {
+              "file": "src/flask/app.py",
+              "line": 66
+            },
+            {
+              "file": "src/flask/sansio/app.py",
+              "line": 47
+            }
+          ]
+        },
+        {
+          "occurrences": 2,
+          "locations": [
+            {
+              "file": "src/flask/app.py",
+              "line": 67
+            },
+            {
+              "file": "src/flask/sansio/app.py",
+              "line": 48
+            }
+          ]
+        },
+        {
+          "occurrences": 2,
+          "locations": [
+            {
+              "file": "src/flask/app.py",
+              "line": 68
+            },
+            {
+              "file": "src/flask/sansio/app.py",
+              "line": 49
+            }
+          ]
+        }
+      ],
+      "method": "normalized 6-line window hashing"
+    },
+    "lint_tools_available": []
+  },
+  "security": {
+    "secrets": [],
+    "risks": [
+      {
+        "pattern": "动态代码执行",
+        "category": "代码注入",
+        "severity": "high",
+        "file": "src/flask/cli.py",
+        "line": 1022,
+        "evidence": "eval(compile(f.read(), startup, \"exec\"), ctx)"
+      },
+      {
+        "pattern": "动态代码执行",
+        "category": "代码注入",
+        "severity": "high",
+        "file": "src/flask/config.py",
+        "line": 209,
+        "evidence": "exec(compile(config_file.read(), filename, \"exec\"), d.__dict__)"
+      },
+      {
+        "pattern": "路径穿越风险",
+        "category": "路径穿越",
+        "severity": "medium",
+        "file": "src/flask/helpers.py",
+        "line": 528,
+        "evidence": "return werkzeug.utils.send_file(  # type: ignore[return-value]"
+      }
+    ],
+    "workflow_issues": [],
+    "config_issues": [
+      {
+        "issue": "调试模式默认开启",
+        "severity": "medium",
+        "file": "src/flask/config.py",
+        "line": 65
+      }
+    ],
+    "env_committed": [
+      {
+        "file": "tests/test_apps/.env",
+        "size": 37
+      }
+    ],
+    "dependency_audit": {
+      "queried": 93,
+      "vulnerable_packages": [
+        {
+          "package": "virtualenv",
+          "version": "21.7.1",
+          "ecosystem": "PyPI",
+          "source_file": "uv.lock",
+          "scope": "project",
+          "vuln_ids": [
+            "GHSA-394h-qwmc-48pf",
+            "GHSA-43mp-35q3-x3fq",
+            "GHSA-494p-63j8-28p3",
+            "GHSA-558c-9hv2-4prj",
+            "GHSA-5vjq-rrrf-7h2q",
+            "GHSA-6w3r-xr62-4xcp",
+            "GHSA-8rjx-v5ww-45pp",
+            "GHSA-94p9-xgh2-xp45",
+            "GHSA-9h9j-4vrj-gf7g",
+            "GHSA-c947-3pg5-gm8q",
+            "GHSA-c978-59m8-c77v",
+            "GHSA-cw65-gx24-rc82"
+          ],
+          "vuln_count": 36,
+          "details_url": "https://osv.dev/list?q=virtualenv&ecosystem=PyPI"
+        },
+        {
+          "package": "filelock",
+          "version": "3.32.2",
+          "ecosystem": "PyPI",
+          "source_file": "uv.lock",
+          "scope": "project",
+          "vuln_ids": [
+            "GHSA-567q-5qvw-pf92",
+            "GHSA-6627-m3xw-93mp",
+            "GHSA-69hj-f68j-2879",
+            "GHSA-8mx5-7m5m-r77g",
+            "GHSA-9c4x-gm8v-wgc4",
+            "GHSA-9vhv-jxww-xfm5",
+            "GHSA-cwqr-hh33-gh44",
+            "GHSA-fq56-3cx3-fjxp",
+            "GHSA-j8f7-rjxc-mr56",
+            "GHSA-m462-7rxw-wvpg",
+            "GHSA-rfpc-qcw5-3pc4",
+            "GHSA-v4x8-3wr5-3wq8"
+          ],
+          "vuln_count": 12,
+          "details_url": "https://osv.dev/list?q=filelock&ecosystem=PyPI"
+        },
+        {
+          "package": "urllib3",
+          "version": "2.7.0",
+          "ecosystem": "PyPI",
+          "source_file": "uv.lock",
+          "scope": "project",
+          "vuln_ids": [
+            "GHSA-8988-9cw3-xx77",
+            "GHSA-gh4c-6fx4-qh6g",
+            "GHSA-vxq7-64xx-v4gw",
+            "PYSEC-2026-4175",
+            "PYSEC-2026-4176",
+            "PYSEC-2026-4177"
+          ],
+          "vuln_count": 6,
+          "details_url": "https://osv.dev/list?q=urllib3&ecosystem=PyPI"
+        },
+        {
+          "package": "certifi",
+          "version": "2026.7.22",
+          "ecosystem": "PyPI",
+          "source_file": "uv.lock",
+          "scope": "project",
+          "vuln_ids": [
+            "GHSA-6q48-6c7w-9gw2",
+            "PYSEC-2026-4320"
+          ],
+          "vuln_count": 2,
+          "details_url": "https://osv.dev/list?q=certifi&ecosystem=PyPI"
+        },
+        {
+          "package": "cryptography",
+          "version": "49.0.0",
+          "ecosystem": "PyPI",
+          "source_file": "uv.lock",
+          "scope": "project",
+          "vuln_ids": [
+            "GHSA-g6cj-pr64-35w5",
+            "PYSEC-2026-3552"
+          ],
+          "vuln_count": 2,
+          "details_url": "https://osv.dev/list?q=cryptography&ecosystem=PyPI"
+        },
+        {
+          "package": "uv",
+          "version": "0.12.0",
+          "ecosystem": "PyPI",
+          "source_file": "uv.lock",
+          "scope": "project",
+          "vuln_ids": [
+            "GHSA-hq85-5cpj-mr62",
+            "PYSEC-2026-4321"
+          ],
+          "vuln_count": 2,
+          "details_url": "https://osv.dev/list?q=uv&ecosystem=PyPI"
+        },
+        {
+          "package": "werkzeug",
+          "version": "3.1.8",
+          "ecosystem": "PyPI",
+          "source_file": "uv.lock",
+          "scope": "project",
+          "vuln_ids": [
+            "GHSA-g6x2-hccm-hh4m",
+            "PYSEC-2026-4312"
+          ],
+          "vuln_count": 2,
+          "details_url": "https://osv.dev/list?q=werkzeug&ecosystem=PyPI"
+        }
+      ],
+      "total_vulns": 62,
+      "project_pinned_count": 79,
+      "example_pinned_count": 14,
+      "unpinned_packages": 20,
+      "ecosystems": [
+        "PyPI"
+      ],
+      "method": "OSV.dev /v1/querybatch（按确切版本查询）",
+      "status": "findings",
+      "note": "项目自身依赖中有 7 个包命中已知漏洞，需升级到 OSV 建议的修复版本。"
+    },
+    "scan_scope": {
+      "text_files_scanned": 138,
+      "code_files_total": 84,
+      "code_files_skipped_as_examples": 56,
+      "secret_patterns_used": 18,
+      "risk_patterns_used": 16,
+      "python_masking": "注释与多行字符串(docstring)已抹除后匹配，减少文档示例误报",
+      "note": "本阶段为静态正则/AST 初筛。命中项需结合上下文与数据流确认，未命中不代表绝对安全（正则无法覆盖业务逻辑漏洞）。"
+    }
+  },
+  "competitors": {
+    "queries": [
+      "web framework in:readme,description language:Python",
+      "topic:web-framework",
+      "topic:werkzeug"
+    ],
+    "candidates": [
+      {
+        "full_name": "django/django",
+        "url": "https://github.com/django/django",
+        "description": "The Web framework for perfectionists with deadlines.",
+        "stars": 91951,
+        "forks": 35117,
+        "language": "Python",
+        "topics": [
+          "apps",
+          "django",
+          "framework",
+          "models",
+          "orm",
+          "python",
+          "templates",
+          "views"
+        ],
+        "license": "BSD-3-Clause",
+        "open_issues": 542,
+        "pushed_at": "2026-11-21T16:52:56Z",
+        "created_at": "2012-04-28T02:47:18Z",
+        "days_since_push": 1,
+        "relevance": {
+          "shared_topics": [],
+          "domain_hit": true,
+          "category_hit": true,
+          "self_described_as_peer": true,
+          "confidence": "high"
+        },
+        "matched_query": "web framework in:readme,description language:Python",
+        "rank_score": 2775.7
+      },
+      {
+        "full_name": "D4Vinci/Scrapling",
+        "url": "https://github.com/D4Vinci/Scrapling",
+        "description": "🕷️ The BEST Web Scraping framework that handles everything from a single request to a full-scale crawl! Don't be shy, join here: https://discord.gg/EMgGbDceNQ and follow here for daily tips and tricks",
+        "stars": 105153,
+        "forks": 11002,
+        "language": "Python",
+        "topics": [
+          "ai",
+          "ai-scraping",
+          "automation",
+          "crawler",
+          "crawling",
+          "crawling-python",
+          "data",
+          "data-extraction"
+        ],
+        "license": "BSD-3-Clause",
+        "open_issues": 25,
+        "pushed_at": "2026-11-23T09:47:22Z",
+        "created_at": "2024-10-13T20:29:53Z",
+        "days_since_push": 0,
+        "relevance": {
+          "shared_topics": [],
+          "domain_hit": true,
+          "category_hit": true,
+          "self_described_as_peer": false,
+          "confidence": "high"
+        },
+        "matched_query": "web framework in:readme,description language:Python",
+        "rank_score": 2744.2
+      },
+      {
+        "full_name": "fastapi/fastapi",
+        "url": "https://github.com/fastapi/fastapi",
+        "description": "FastAPI framework, high performance, easy to learn, fast to code, ready for production",
+        "stars": 105060,
+        "forks": 10369,
+        "language": "Python",
+        "topics": [
+          "api",
+          "async",
+          "fastapi",
+          "framework",
+          "json",
+          "json-schema",
+          "openapi",
+          "pydantic"
+        ],
+        "license": "MIT",
+        "open_issues": 50,
+        "pushed_at": "2026-11-18T19:14:19Z",
+        "created_at": "2018-12-08T08:21:47Z",
+        "days_since_push": 4,
+        "relevance": {
+          "shared_topics": [],
+          "domain_hit": true,
+          "category_hit": true,
+          "self_described_as_peer": false,
+          "confidence": "high"
+        },
+        "matched_query": "web framework in:readme,description language:Python",
+        "rank_score": 2742.5
+      },
+      {
+        "full_name": "apache/superset",
+        "url": "https://github.com/apache/superset",
+        "description": "Apache Superset is a Data Visualization and Data Exploration Platform",
+        "stars": 75629,
+        "forks": 18634,
+        "language": "Python",
+        "topics": [
+          "analytics",
+          "apache",
+          "apache-superset",
+          "asf",
+          "bi",
+          "business-analytics",
+          "business-intelligence",
+          "data-analysis"
+        ],
+        "license": "Apache-2.0",
+        "open_issues": 594,
+        "pushed_at": "2026-11-23T09:58:14Z",
+        "created_at": "2015-07-21T18:55:34Z",
+        "days_since_push": 0,
+        "relevance": {
+          "shared_topics": [
+            "flask"
+          ],
+          "domain_hit": false,
+          "category_hit": false,
+          "self_described_as_peer": false,
+          "confidence": "high"
+        },
+        "matched_query": "web framework in:readme,description language:Python",
+        "rank_score": 2290.1
+      },
+      {
+        "full_name": "scrapy/scrapy",
+        "url": "https://github.com/scrapy/scrapy",
+        "description": "Scrapy, a fast high-level web crawling & scraping framework for Python.",
+        "stars": 65548,
+        "forks": 12149,
+        "language": "Python",
+        "topics": [
+          "crawler",
+          "crawling",
+          "framework",
+          "hacktoberfest",
+          "python",
+          "scraping",
+          "web-scraping",
+          "web-scraping-python"
+        ],
+        "license": "BSD-3-Clause",
+        "open_issues": 172,
+        "pushed_at": "2026-11-19T11:03:58Z",
+        "created_at": "2010-02-22T02:01:14Z",
+        "days_since_push": 3,
+        "relevance": {
+          "shared_topics": [],
+          "domain_hit": true,
+          "category_hit": true,
+          "self_described_as_peer": false,
+          "confidence": "high"
+        },
+        "matched_query": "web framework in:readme,description language:Python",
+        "rank_score": 2197.8
+      },
+      {
+        "full_name": "crewAIInc/crewAI",
+        "url": "https://github.com/crewAIInc/crewAI",
+        "description": "Framework for orchestrating role-playing, autonomous AI agents. By fostering collaborative intelligence, CrewAI empowers agents to work together seamlessly, tackling complex tasks.",
+        "stars": 61191,
+        "forks": 9257,
+        "language": "Python",
+        "topics": [
+          "agents",
+          "ai",
+          "ai-agents",
+          "aiagentframework",
+          "llms"
+        ],
+        "license": "MIT",
+        "open_issues": 1260,
+        "pushed_at": "2026-11-23T10:20:08Z",
+        "created_at": "2023-10-27T03:26:59Z",
+        "days_since_push": 0,
+        "relevance": {
+          "shared_topics": [],
+          "domain_hit": false,
+          "category_hit": true,
+          "self_described_as_peer": false,
+          "confidence": "high"
+        },
+        "matched_query": "web framework in:readme,description language:Python",
+        "rank_score": 2068.9
+      },
+      {
+        "full_name": "sanic-org/sanic",
+        "url": "https://github.com/sanic-org/sanic",
+        "description": " Accelerate your web app development  | Build fast. Run fast.",
+        "stars": 18639,
+        "forks": 1618,
+        "language": "Python",
+        "topics": [
+          "api-server",
+          "asgi",
+          "asyncio",
+          "framework",
+          "python",
+          "sanic",
+          "web",
+          "web-framework"
+        ],
+        "license": "MIT",
+        "open_issues": 167,
+        "pushed_at": "2026-11-20T17:16:24Z",
+        "created_at": "2016-05-26T04:38:22Z",
+        "days_since_push": 2,
+        "relevance": {
+          "shared_topics": [
+            "web-framework"
+          ],
+          "domain_hit": true,
+          "category_hit": true,
+          "self_described_as_peer": false,
+          "confidence": "medium"
+        },
+        "matched_query": "topic:web-framework",
+        "rank_score": 1281.9
+      },
+      {
+        "full_name": "frappe/frappe",
+        "url": "https://github.com/frappe/frappe",
+        "description": "Low code web framework for real world applications, in Python and Javascript",
+        "stars": 11140,
+        "forks": 5551,
+        "language": "Python",
+        "topics": [
+          "cms",
+          "email",
+          "erpnext",
+          "frappe",
+          "full-stack",
+          "javascript",
+          "low-code",
+          "mariadb"
+        ],
+        "license": "MIT",
+        "open_issues": 2421,
+        "pushed_at": "2026-11-23T10:17:27Z",
+        "created_at": "2011-06-08T08:14:16Z",
+        "days_since_push": 0,
+        "relevance": {
+          "shared_topics": [
+            "web-framework"
+          ],
+          "domain_hit": true,
+          "category_hit": true,
+          "self_described_as_peer": true,
+          "confidence": "medium"
+        },
+        "matched_query": "topic:web-framework",
+        "rank_score": 1234.4
+      },
+      {
+        "full_name": "mahmoud/clastic",
+        "url": "https://github.com/mahmoud/clastic",
+        "description": "🏔️ A functional web framework that streamlines explicit development practices while eliminating global state.",
+        "stars": 163,
+        "forks": 20,
+        "language": "Python",
+        "topics": [
+          "middleware",
+          "python",
+          "web-framework",
+          "werkzeug",
+          "wsgi"
+        ],
+        "license": "NOASSERTION",
+        "open_issues": 7,
+        "pushed_at": "2026-07-17T18:49:48Z",
+        "created_at": "2012-11-23T01:24:04Z",
+        "days_since_push": 128,
+        "relevance": {
+          "shared_topics": [
+            "web-framework",
+            "werkzeug",
+            "wsgi"
+          ],
+          "domain_hit": true,
+          "category_hit": true,
+          "self_described_as_peer": true,
+          "confidence": "medium"
+        },
+        "matched_query": "topic:werkzeug",
+        "rank_score": 554.6
+      },
+      {
+        "full_name": "Gurupatil0003/RestFull_API",
+        "url": "https://github.com/Gurupatil0003/RestFull_API",
+        "description": "A RESTful API in Flask refers to an application programming interface (API) built using the Flask web framework that follows the principles of Representational State Transfer (REST). Flask is a micro ",
+        "stars": 36,
+        "forks": 8,
+        "language": "Python",
+        "topics": [
+          "client",
+          "crud-api",
+          "crud-operation",
+          "curl",
+          "flask",
+          "http-server",
+          "json",
+          "jwt-authentication"
+        ],
+        "license": "Apache-2.0",
+        "open_issues": 0,
+        "pushed_at": "2025-05-13T07:35:30Z",
+        "created_at": "2024-03-03T07:13:17Z",
+        "days_since_push": 559,
+        "relevance": {
+          "shared_topics": [
+            "flask",
+            "werkzeug"
+          ],
+          "domain_hit": true,
+          "category_hit": true,
+          "self_described_as_peer": true,
+          "confidence": "medium"
+        },
+        "matched_query": "topic:werkzeug",
+        "rank_score": 428.0
+      }
+    ],
+    "search_errors": [],
+    "filtered_out": 77,
+    "category": "framework",
+    "domain": "web",
+    "strategy": "主力：领域词+品类词短语查询（in:readme,description）；补充：具体 topic 查询 + 品类校验",
+    "note": "候选只是线索，不是结论。必须逐个打开 README 与依赖清单核实功能，确认许可证后才能写进对比表；star 不代表质量。"
+  },
+  "elapsed_s": 36.5
+}

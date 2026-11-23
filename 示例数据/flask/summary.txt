@@ -1,0 +1,57 @@
+==============================================================================
+GitHub 项目体检 · 数据摘要
+==============================================================================
+仓库      : pallets/flask
+描述      : The Python micro framework for building web applications.
+URL       : https://github.com/pallets/flask
+Star/Fork : 75352 / 17299    Issues(open): 4
+License   : BSD-3-Clause
+默认分支  : main
+最近推送  : 2026-10-30T15:05:22Z
+
+--- 技术栈 ---
+语言      : Python 100.0%
+项目类型  : web-backend, cli, library
+框架      : Flask, Celery, pytest, Click
+构建系统  : pip, Python (PEP 621/Poetry), Make
+单仓多项目: 否
+依赖数量  : 99
+
+--- 代码质量 ---
+总行数(抽样) : 18483
+扫描文件数   : 84
+长函数/复杂函数: 6 / 19
+裸 except     : 1
+TODO/FIXME    : 9 {'XXX': 9}
+重复代码窗口  : 1.09%
+
+--- 安全 ---
+疑似硬编码密钥: 0
+代码风险命中  : 3
+Actions 问题  : 0
+依赖漏洞      : 项目自身 0 个包 / 示例目录 3 个包（查询 21 个锁定版本，状态 unverified_project_scope）
+--- GitHub 健康度 ---
+Open Issues(抽样): 1（其中 180 天未更新 0）
+Open PRs(抽样)   : 3
+近 90 天提交     : 10
+最新 Release     : 3.1.3（277 天前）
+贡献者(抽样)     : 100   bus factor≈3
+社区健康分       : 87
+
+--- 同类项目候选（10 个）---
+  django/django                            ★91951  Python       BSD-3-Clause
+  D4Vinci/Scrapling                        ★105153 Python       BSD-3-Clause
+  fastapi/fastapi                          ★105060 Python       MIT
+  apache/superset                          ★75629  Python       Apache-2.0
+  scrapy/scrapy                            ★65548  Python       BSD-3-Clause
+  crewAIInc/crewAI                         ★61191  Python       MIT
+  sanic-org/sanic                          ★18639  Python       MIT
+  frappe/frappe                            ★11140  Python       MIT
+  mahmoud/clastic                          ★163    Python       NOASSERTION
+  Gurupatil0003/RestFull_API               ★36     Python       Apache-2.0
+
+--- 访问限制 / 未验证事项 ---
+  · GitHub API 剩余配额仅 7 次；如需完整数据请设置 GITHUB_TOKEN。
+  · 当前为匿名访问（60 次/小时）。部分列表接口只抽样前 100~200 条，报告中的 issue/PR 计数为抽样值，需与 open_issues_count 区分。
+
+完整数据: C:\Users\lenmo\Desktop\GitHub 项目全方位体检专家\_test\flask\inspector-data.json

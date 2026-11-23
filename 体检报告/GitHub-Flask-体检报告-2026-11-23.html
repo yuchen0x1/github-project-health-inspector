@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flask 项目体检报告 · 87/100</title>
+<style>
+  :root{
+    --bg:#0a0e17; --bg2:#0f1521; --panel:#131b2a; --panel2:#182233;
+    --line:#223047; --text:#e6edf7; --dim:#8fa3bf; --dimmer:#5f7291;
+    --accent:#38bdf8; --accent2:#818cf8; --ok:#34d399; --warn:#fbbf24;
+    --bad:#f87171; --p1:#fb923c; --p2:#facc15; --p3:#60a5fa;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:
+      radial-gradient(900px 500px at 12% -8%, rgba(56,189,248,.14), transparent 60%),
+      radial-gradient(700px 420px at 88% 0%, rgba(129,140,248,.12), transparent 60%),
+      var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    line-height:1.65; padding:40px 20px 80px; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1120px;margin:0 auto}
+  .mono{font-family:ui-monospace,SFMono-Regular,"Cascadia Code",Consolas,monospace}
+
+  /* header */
+  header{border-bottom:1px solid var(--line);padding-bottom:28px;margin-bottom:32px}
+  .eyebrow{color:var(--accent);font-size:12px;letter-spacing:.22em;text-transform:uppercase;margin-bottom:10px}
+  h1{font-size:34px;font-weight:700;letter-spacing:-.02em}
+  h1 span{color:var(--dim);font-weight:400}
+  .meta{margin-top:14px;display:flex;flex-wrap:wrap;gap:10px 22px;color:var(--dim);font-size:13px}
+  .meta b{color:var(--text);font-weight:500}
+
+  /* score hero */
+  .hero{display:grid;grid-template-columns:280px 1fr;gap:26px;margin-bottom:38px}
+  .card{background:linear-gradient(160deg,var(--panel),var(--bg2));border:1px solid var(--line);
+        border-radius:16px;padding:24px}
+  .score-box{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+  .score-num{font-size:56px;font-weight:800;letter-spacing:-.03em;
+             background:linear-gradient(120deg,#7dd3fc,#a5b4fc);-webkit-background-clip:text;
+             background-clip:text;-webkit-text-fill-color:transparent;line-height:1}
+  .score-label{color:var(--dim);font-size:13px;margin-top:6px}
+  .grade{display:inline-block;margin-top:14px;padding:5px 16px;border-radius:999px;font-size:13px;
+         font-weight:600;color:#062e1f;background:linear-gradient(120deg,#34d399,#6ee7b7)}
+  .verdict{font-size:17px;line-height:1.7}
+  .verdict em{color:var(--accent);font-style:normal;font-weight:600}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:18px}
+  .kpi{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:10px;padding:12px}
+  .kpi .v{font-size:20px;font-weight:700}
+  .kpi .k{font-size:11px;color:var(--dimmer);margin-top:2px}
+
+  /* sections */
+  section{margin-bottom:40px}
+  h2{font-size:19px;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+  h2::before{content:"";width:3px;height:18px;border-radius:2px;
+             background:linear-gradient(180deg,var(--accent),var(--accent2))}
+  h2 small{color:var(--dimmer);font-weight:400;font-size:12px;margin-left:auto}
+
+  /* dimension bars */
+  .dims{display:grid;gap:9px}
+  .dim{display:grid;grid-template-columns:118px 1fr 62px;align-items:center;gap:14px;font-size:13px}
+  .dim .name{color:var(--dim)}
+  .bar{height:8px;background:#1b2436;border-radius:99px;overflow:hidden}
+  .bar i{display:block;height:100%;border-radius:99px;
+         background:linear-gradient(90deg,#0ea5e9,#818cf8)}
+  .bar i.hi{background:linear-gradient(90deg,#10b981,#34d399)}
+  .bar i.mid{background:linear-gradient(90deg,#f59e0b,#fbbf24)}
+  .dim .val{text-align:right;color:var(--text);font-variant-numeric:tabular-nums}
+  .dim .val s{color:var(--dimmer);text-decoration:none;font-size:11px}
+
+  /* tables */
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--dimmer);font-weight:600;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+  tr:hover td{background:rgba(56,189,248,.04)}
+  td code,.path{font-family:ui-monospace,Consolas,monospace;font-size:12px;color:#93c5fd;
+                background:rgba(56,189,248,.08);padding:1px 6px;border-radius:4px}
+
+  /* pills */
+  .pill{display:inline-block;padding:2px 9px;border-radius:6px;font-size:11px;font-weight:700;letter-spacing:.04em}
+  .p1{background:rgba(251,146,60,.16);color:var(--p1);border:1px solid rgba(251,146,60,.35)}
+  .p2{background:rgba(250,204,21,.14);color:var(--p2);border:1px solid rgba(250,204,21,.32)}
+  .p3{background:rgba(96,165,250,.14);color:var(--p3);border:1px solid rgba(96,165,250,.32)}
+  .ok{background:rgba(52,211,153,.14);color:var(--ok);border:1px solid rgba(52,211,153,.32)}
+  .nope{background:rgba(248,113,113,.14);color:var(--bad);border:1px solid rgba(248,113,113,.32)}
+
+  /* issue cards */
+  .issue{border:1px solid var(--line);border-left:3px solid var(--p1);border-radius:10px;
+         padding:16px 18px;margin-bottom:12px;background:rgba(255,255,255,.02)}
+  .issue h3{font-size:14px;margin-bottom:8px;display:flex;gap:10px;align-items:center}
+  .issue dl{display:grid;grid-template-columns:72px 1fr;gap:4px 10px;font-size:12.5px;color:var(--dim)}
+  .issue dt{color:var(--dimmer)}
+  .issue dd{color:var(--text)}
+
+  /* roadmap */
+  .road{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .phase{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);
+         border-radius:14px;padding:18px}
+  .phase .tag{font-size:11px;letter-spacing:.16em;color:var(--accent);text-transform:uppercase}
+  .phase h4{font-size:15px;margin:6px 0 4px}
+  .phase .when{font-size:11px;color:var(--dimmer);margin-bottom:12px}
+  .phase ul{list-style:none;font-size:12.5px;color:var(--dim)}
+  .phase li{padding-left:16px;position:relative;margin-bottom:7px}
+  .phase li::before{content:"›";position:absolute;left:2px;color:var(--accent)}
+
+  .note{border:1px dashed var(--line);border-radius:10px;padding:14px 16px;font-size:12.5px;
+        color:var(--dim);background:rgba(255,255,255,.02)}
+  .note b{color:var(--warn)}
+  footer{margin-top:56px;padding-top:22px;border-top:1px solid var(--line);
+         color:var(--dimmer);font-size:12px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  @media(max-width:860px){
+    .hero{grid-template-columns:1fr}
+    .kpis{grid-template-columns:repeat(2,1fr)}
+    .road{grid-template-columns:1fr}
+    .dim{grid-template-columns:96px 1fr 54px}
+    h1{font-size:26px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">GitHub Project Health Inspector</div>
+    <h1>pallets/flask <span>· 项目体检报告</span></h1>
+    <div class="meta">
+      <div>检测时间 <b>2026-11-23</b></div>
+      <div>Commit <b class="mono">49943b5</b></div>
+      <div>许可证 <b>BSD-3-Clause</b></div>
+      <div>方式 <b>只读静态审计 + GitHub API</b></div>
+    </div>
+  </header>
+
+  <div class="hero">
+    <div class="card score-box">
+      <div class="score-num">87</div>
+      <div class="score-label">综合健康评分 / 100</div>
+      <div class="grade">良好</div>
+      <div style="margin-top:16px;font-size:12px;color:var(--dimmer)">
+        P0 <b style="color:var(--ok)">0</b> · P1 <b style="color:var(--p1)">3</b> · P2 <b style="color:var(--p2)">3</b> · P3 <b style="color:var(--p3)">3</b>
+      </div>
+    </div>
+
+    <div class="card">
+      <p class="verdict">
+        工程质量与文档达到教科书级，<em>没有可指摘的代码硬伤</em>——3 条安全正则命中经复核全部为误报或设计内行为。
+        真正的问题在流程：锁文件里 7 个包带已知漏洞、<em>277 天未发版</em>而主干仍在提交、92% 的提交来自同一人。
+      </p>
+      <div class="kpis">
+        <div class="kpi"><div class="v">75,352</div><div class="k">Stars</div></div>
+        <div class="kpi"><div class="v">18,483</div><div class="k">源码行数</div></div>
+        <div class="kpi"><div class="v">4</div><div class="k">未关闭 Issue</div></div>
+        <div class="kpi"><div class="v">7</div><div class="k">依赖漏洞包</div></div>
+      </div>
+    </div>
+  </div>
+
+  <section>
+    <h2>维度评分 <small>UI/UX 不适用，10 分按 4/3/3 摊入代码质量·功能完整度·工程化</small></h2>
+    <div class="card dims">
+      <div class="dim"><div class="name">代码质量</div><div class="bar"><i class="hi" style="width:89.5%"></i></div><div class="val">17<s>/19</s></div></div>
+      <div class="dim"><div class="name">安全性</div><div class="bar"><i class="mid" style="width:80%"></i></div><div class="val">12<s>/15</s></div></div>
+      <div class="dim"><div class="name">功能完整度</div><div class="bar"><i class="hi" style="width:94.4%"></i></div><div class="val">17<s>/18</s></div></div>
+      <div class="dim"><div class="name">性能表现</div><div class="bar"><i class="mid" style="width:70%"></i></div><div class="val">7<s>/10</s></div></div>
+      <div class="dim"><div class="name">架构设计</div><div class="bar"><i class="hi" style="width:90%"></i></div><div class="val">9<s>/10</s></div></div>
+      <div class="dim"><div class="name">工程化</div><div class="bar"><i class="hi" style="width:92.3%"></i></div><div class="val">12<s>/13</s></div></div>
+      <div class="dim"><div class="name">文档质量</div><div class="bar"><i class="hi" style="width:100%"></i></div><div class="val">5<s>/5</s></div></div>
+      <div class="dim"><div class="name">可维护性</div><div class="bar"><i class="hi" style="width:80%"></i></div><div class="val">4<s>/5</s></div></div>
+      <div class="dim"><div class="name">开源生态</div><div class="bar"><i class="hi" style="width:80%"></i></div><div class="val">4<s>/5</s></div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>P1 高优先级问题 <small>无 P0；以下三项互为因果</small></h2>
+
+    <div class="issue">
+      <h3><span class="pill p1">P1-1</span> 运行时依赖 werkzeug 锁定版本存在已知漏洞</h3>
+      <dl>
+        <dt>位置</dt><dd><span class="path">uv.lock</span> · werkzeug <b>3.1.8</b>（修复于 3.1.9）</dd>
+        <dt>依据</dt><dd><a href="https://osv.dev/vulnerability/GHSA-g6x2-hccm-hh4m" target="_blank">GHSA-g6x2-hccm-hh4m</a> · safe_join() 允许 Windows 特殊设备名 · MODERATE</dd>
+        <dt>影响</dt><dd>本项目 CI 与贡献者环境；下游用户因 <span class="path">werkzeug>=3.1.0</span> 范围声明通常已获修复版，<b>不直接受影响</b></dd>
+        <dt>修复</dt><dd><span class="path">uv lock --upgrade-package werkzeug &amp;&amp; uv sync</span>，并把下限提到 <b>3.1.9</b></dd>
+      </dl>
+    </div>
+
+    <div class="issue">
+      <h3><span class="pill p1">P1-2</span> 缺少依赖自动更新机制，导致漏洞持续累积</h3>
+      <dl>
+        <dt>位置</dt><dd>仓库根目录无 <span class="path">.github/dependabot.yml</span>、无 <span class="path">renovate.json</span></dd>
+        <dt>影响</dt><dd>P1-1 反复出现的根因；<span class="path">uv.lock</span> 中 7 个包命中 OSV 即为结果</dd>
+        <dt>修复</dt><dd>新增 dependabot（uv weekly + 分组 + patch 自动合并）</dd>
+      </dl>
+    </div>
+
+    <div class="issue">
+      <h3><span class="pill p1">P1-3</span> 发版节奏严重滞后于主干开发</h3>
+      <dl>
+        <dt>位置</dt><dd>最新 tag <b>3.1.3</b>（277 天前）；<span class="path">main</span> 近 14 月 100+ 次提交</dd>
+        <dt>影响</dt><dd>所有 PyPI 用户——已合并的修复无法获取，只能装 git 版本</dd>
+        <dt>修复</dt><dd>约定 8–12 周 minor 节奏，<span class="path">publish.yaml</span> 改为 tag 触发自动化</dd>
+      </dl>
+    </div>
+  </section>
+
+  <section>
+    <h2>安全审计：3 条命中，全部复核为非漏洞 <small>这是审计纪律，不是项目运气</small></h2>
+    <table>
+      <thead><tr><th>命中模式</th><th>位置</th><th>复核结论</th><th>判定</th></tr></thead>
+      <tbody>
+        <tr><td>动态代码执行</td><td><span class="path">cli.py:1022</span></td><td>读取用户本机 <span class="path">PYTHONSTARTUP</span>，无外部输入；语法上应为 exec</td><td><span class="pill p3">非漏洞</span></td></tr>
+        <tr><td>动态代码执行</td><td><span class="path">config.py:209</span></td><td>from_pyfile 执行配置是文档化设计，前提是攻击者已能写文件</td><td><span class="pill p3">非漏洞</span></td></tr>
+        <tr><td>路径穿越</td><td><span class="path">helpers.py:528</span></td><td>实为 werkzeug.send_file 调用，路径约束在上游完成</td><td><span class="pill ok">误报</span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>依赖漏洞（OSV.dev 实测，93 个锁定版本）</h2>
+    <table>
+      <thead><tr><th>包</th><th>当前</th><th>修复版</th><th>严重度</th><th>作用域</th></tr></thead>
+      <tbody>
+        <tr><td>werkzeug</td><td class="mono">3.1.8</td><td class="mono">3.1.9</td><td><span class="pill p2">MODERATE</span></td><td>运行时</td></tr>
+        <tr><td>urllib3</td><td class="mono">2.7.0</td><td class="mono">2.8.0</td><td><span class="pill nope">HIGH</span></td><td>开发 / 测试</td></tr>
+        <tr><td>cryptography</td><td class="mono">49.0.0</td><td class="mono">50.0.0</td><td><span class="pill nope">HIGH</span></td><td>开发 / 文档</td></tr>
+        <tr><td>certifi · virtualenv · filelock · uv</td><td class="mono">—</td><td>见 OSV</td><td><span class="pill p3">低-中</span></td><td>工具链</td></tr>
+      </tbody>
+    </table>
+    <div class="note" style="margin-top:12px">
+      <b>解读：</b>只有 werkzeug 进入用户运行时；Flask 使用范围声明，下游安装会解析到最新版，因此漏洞不会自动传播。其余 6 个是开发/构建工具链依赖。
+    </div>
+  </section>
+
+  <section>
+    <h2>同类项目对比 <small>方向性判断，非代码级结论</small></h2>
+    <table>
+      <thead><tr><th>项目</th><th>架构</th><th>值得借鉴</th><th>许可证</th></tr></thead>
+      <tbody>
+        <tr><td><a href="https://github.com/django/django" target="_blank">django/django</a></td><td>MTV 全家桶</td><td>弃用时间表写进发布文档，升级路径可预期</td><td>BSD-3</td></tr>
+        <tr><td><a href="https://github.com/fastapi/fastapi" target="_blank">fastapi/fastapi</a></td><td>ASGI + Pydantic</td><td>类型注解同时驱动校验、序列化、OpenAPI 文档</td><td>MIT</td></tr>
+        <tr><td><a href="https://github.com/sanic-org/sanic" target="_blank">sanic-org/sanic</a></td><td>原生 async/await</td><td>自带性能基准并纳入 CI，回归可见</td><td>MIT</td></tr>
+        <tr><td><a href="https://github.com/frappe/frappe" target="_blank">frappe/frappe</a></td><td>元数据驱动</td><td>DocType 生成 CRUD 与权限，减少样板</td><td>MIT</td></tr>
+        <tr><td><a href="https://github.com/mahmoud/clastic" target="_blank">mahmoud/clastic</a></td><td>函数式路由</td><td>路由参数与视图签名强绑定</td><td>NOASSERTION</td></tr>
+      </tbody>
+    </table>
+    <div class="note" style="margin-top:12px">
+      <b>许可证提醒：</b>clastic 为 NOASSERTION（无标准许可证），<b>代码不可复用</b>，仅可借鉴设计思路。
+    </div>
+  </section>
+
+  <section>
+    <h2>三阶段升级路线图</h2>
+    <div class="road">
+      <div class="phase">
+        <div class="tag">Phase 1</div>
+        <h4>紧急修复</h4>
+        <div class="when">1 周内 · 合计约 3 人日</div>
+        <ul>
+          <li>刷新 uv.lock（werkzeug / urllib3 / cryptography）</li>
+          <li>新增 dependabot.yml</li>
+          <li>新增 SECURITY.md</li>
+          <li>CI 增加 uv lock --check</li>
+        </ul>
+      </div>
+      <div class="phase">
+        <div class="tag">Phase 2</div>
+        <h4>核心升级</h4>
+        <div class="when">1–2 月</div>
+        <ul>
+          <li>固定 8–12 周发版节奏</li>
+          <li>benchmarks 入 CI 设阈值</li>
+          <li>拆分 make_response（复杂度 16→8）</li>
+          <li>扩大维护者与 review 分工</li>
+        </ul>
+      </div>
+      <div class="phase">
+        <div class="tag">Phase 3</div>
+        <h4>长期进化</h4>
+        <div class="when">3 月+</div>
+        <ul>
+          <li>类型驱动参数校验（扩展层）</li>
+          <li>弃用时间表机制</li>
+          <li>可选 ASGI 适配层</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>检测范围与未验证事项</h2>
+    <table>
+      <thead><tr><th>项</th><th>原因</th><th>对结论的影响</th></tr></thead>
+      <tbody>
+        <tr><td>运行时性能</td><td>未在隔离环境跑基准</td><td>性能维度封顶 7/10，报告不含任何耗时数字</td></tr>
+        <tr><td>测试覆盖率</td><td>未执行 pytest --cov</td><td>仅声明"测试文件数比例"，不等于覆盖率</td></tr>
+        <tr><td>历史 Issues 全量</td><td>匿名 API 抽样前 100–200 条</td><td>历史累计统计不完整</td></tr>
+        <tr><td>同类项目源码</td><td>仅查公开 README 与元数据</td><td>对比表为方向性判断</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer>
+    <div>只读审计 · 未修改仓库 · 未上传源码至第三方（OSV 仅发送包名+版本）</div>
+    <div>Generated by GitHub Project Health Inspector v1.0.0</div>
+  </footer>
+
+</div>
+</body>
+</html>
