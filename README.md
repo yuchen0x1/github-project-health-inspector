@@ -46,7 +46,11 @@ Copy-Item -Recurse .\github-project-health-inspector\github-project-health-inspe
 
 ## 用法
 
+在仓库根目录先进入技能目录：
+
 ```bash
+cd github-project-health-inspector
+
 # 1) 采集（输出 inspector-data.json + summary.txt）
 python scripts/github-inspector.py https://github.com/owner/repo --out ./out
 
@@ -57,9 +61,31 @@ python scripts/github-inspector.py --local /path/to/project --out ./out
 python scripts/report-validator.py "GitHub-项目名-体检报告-2026-11-23.md"
 ```
 
-可选参数：`--stage repo|code|github|competitors`（分阶段执行）、`--budget N`（限制 API 调用次数）、`--no-clone`（跳过克隆，仅走 API）。
+可选参数：`--stage all|meta|clone|analyze|github|competitors`（分阶段执行；兼容旧文档中的 `repo`/`code` 别名）、`--budget N`（限制 GitHub API 调用次数）、`--no-clone`（跳过克隆，仅走 API）。本地模式默认不联网；需要在线核对锁定依赖时，显式加 `--allow-network`。`--max-files` 只限制源码遍历，不会减少克隆下载量。
 
 仅依赖 Python 标准库，无需 pip 安装。设置 `GITHUB_TOKEN` 可把匿名 60 次/小时的配额提到 5000 次。
+
+## 更新与升级
+
+当前版本 **1.0.1**。下载最新安装包后，将其中的 `github-project-health-inspector/` 覆盖到原 skills 目录，再重新打开 WorkBuddy 会话。报告和审计数据不属于技能安装包，不需要迁移；升级前请备份自己修改过的技能文件。
+
+```bash
+python scripts/check-updates.py
+python scripts/github-inspector.py --version
+```
+
+更新检查只访问本项目的官方 GitHub Latest Release，不上传审计项目数据，不下载或执行更新；断网会显示未验证。`--local` 审计不会暗中检查更新。1.0.0 没有更新检查功能，旧用户需要主动访问 Releases、订阅 GitHub 发布通知或手动覆盖升级，无法通过一次服务器发版追溯添加弹窗。
+
+## 开发验证
+
+以下命令在仓库根目录执行：
+
+```bash
+python -m unittest discover -s tests -v
+python tools/build_release.py --output dist
+```
+
+安装包采用白名单，只包含技能源码、参考标准、模板、版本文件与许可证，排除缓存、凭据和临时审计数据。GitHub Actions 在 Windows/Linux 和多个 Python 版本上运行回归测试，并执行 CodeQL 检查。
 
 ## 目录
 

@@ -3,7 +3,7 @@
 一个 WorkBuddy Skill：**只给一个 GitHub 链接**，自动完成源码审计、安全与依赖漏洞检查、性能与工程化评估、同类项目研究、100 分制评分，输出带证据的正式报告与三阶段升级路线图。
 
 - 技能标识：`github-project-health-inspector`
-- 版本：1.0.0
+- 版本：1.0.1
 - 依赖：Python ≥ 3.8（**仅标准库**，无需 pip 安装）、git（可选，缺失时自动回退 zipball）
 - 可选：`GITHUB_TOKEN` 环境变量（API 配额 60/h → 5000/h）
 
@@ -16,13 +16,13 @@
 ```bash
 # macOS / Linux
 mkdir -p ~/.workbuddy/skills
-unzip github-project-health-inspector-1.0.0.zip -d ~/.workbuddy/skills/
+unzip github-project-health-inspector-1.0.1.zip -d ~/.workbuddy/skills/
 ```
 
 ```powershell
 # Windows PowerShell
 New-Item -ItemType Directory -Force "$env:USERPROFILE\.workbuddy\skills" | Out-Null
-Expand-Archive .\github-project-health-inspector-1.0.0.zip -DestinationPath "$env:USERPROFILE\.workbuddy\skills"
+Expand-Archive .\github-project-health-inspector-1.0.1.zip -DestinationPath "$env:USERPROFILE\.workbuddy\skills"
 ```
 
 安装后目录应为：
@@ -31,12 +31,20 @@ Expand-Archive .\github-project-health-inspector-1.0.0.zip -DestinationPath "$en
 ~/.workbuddy/skills/github-project-health-inspector/
 ├── SKILL.md
 ├── README.md
+├── VERSION
+├── LICENSE
 ├── references/   (7 份标准)
 ├── templates/    (3 份模板)
-└── scripts/      (2 个脚本)
+└── scripts/      (采集、校验、更新检查)
 ```
 
 重启 WorkBuddy（或重新打开会话）使技能生效。
+
+### 已安装用户升级
+
+先运行 `python scripts/check-updates.py` 检查官方最新版。下载后解压覆盖同名技能目录即可，PowerShell 的 `Expand-Archive` 加 `-Force`，macOS/Linux 的 `unzip` 加 `-o`。保留在安装目录以外的报告和审计数据无需迁移；自定义技能文件请先备份。
+
+检查失败只表示未验证，不代表已经是最新版，也不会阻止审计。1.0.0 未包含检查器，需从 GitHub Releases 主动升级或订阅发布通知；不能追溯为离线旧副本添加自动提示。
 
 ### 方式 2：项目级安装
 
@@ -78,6 +86,7 @@ audit-<repo>/
 ## 单独使用脚本
 
 脚本可脱离对话直接跑，适合 CI 或批量巡检。
+以下命令在技能目录执行。
 
 ```bash
 # 全量体检
@@ -90,7 +99,7 @@ python scripts/github-inspector.py owner/repo
 # 只做代码层分析（不调 GitHub API，适合本地项目或限流时）
 python scripts/github-inspector.py --local /path/to/project --out ./audit
 
-# 大仓库分批
+# 限制静态扫描规模（不减少克隆下载量）
 python scripts/github-inspector.py <url> --max-files 3000
 
 # 校验报告是否合格
@@ -103,12 +112,17 @@ python scripts/report-validator.py "体检报告/GitHub-xxx-体检报告-2026-11
 |---|---|
 | `--out DIR` | 输出目录（默认 `./inspector-out`） |
 | `--local PATH` | 审计本地目录，离线，不调 API |
+| `--allow-network` | 本地模式显式允许 OSV 查询；默认不联网 |
+| `--stage STAGE` | all / meta / clone / analyze / github / competitors；repo、code 为兼容别名 |
 | `--token` | GitHub Token（也可用 `GITHUB_TOKEN`/`GH_TOKEN`） |
 | `--no-clone` | 只用 API，不下载源码（代码层结论会缺失） |
 | `--max-files N` | 扫描文件上限（默认 8000） |
 | `--budget N` | API 调用预算（默认 80；匿名限流 60/h） |
 | `--skip-osv` | 跳过依赖漏洞查询 |
 | `--json-only` | 只打印数据文件路径 |
+| `--version` | 显示当前版本 |
+
+源码下载不会删除已有工作目录，会为本次下载使用独立目录。`--keep-clone` 继续兼容，源码始终保留以便复核。OSV 查询失败或额度不足时，结果标记为未完整验证，不应解读成“没有漏洞”。
 
 `report-validator.py` 退出码：`0` 通过 / `1` 有阻断性问题 / `2` 文件不可读。加 `--strict` 提高证据门槛，`--json` 输出机器可读结果。
 

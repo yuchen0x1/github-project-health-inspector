@@ -3,7 +3,7 @@ name: github-project-health-inspector
 description: "用户发送 GitHub 仓库链接（或 owner/repo、本地项目目录）即触发：自动克隆读取源码、识别技术栈、审计安全与依赖漏洞、分析代码质量/架构/性能/UI/工程化、检索同类开源项目对比、按 100 分制打分、生成带证据的正式体检报告与三阶段升级路线图。触发词：GitHub 体检、项目体检、仓库审计、代码审查、仓库健康度、code review my repo、audit this repo、分析这个仓库、看看这个项目怎么样、github.com 链接。"
 description_zh: "只要一个 GitHub 链接，全自动完成代码/安全/性能/工程化审计 + 竞品对比 + 评分 + 升级路线图"
 description_en: "Paste a GitHub URL and get a full evidence-backed health audit, competitor analysis and upgrade roadmap"
-version: 1.0.0
+version: 1.0.1
 display_name: "GitHub 项目全方位体检专家"
 display_name_en: "GitHub Project Health Inspector"
 license: MIT
@@ -40,6 +40,7 @@ ls "$SKILL_DIR/scripts/github-inspector.py"
 - Python ≥ 3.8 即可，**脚本只用标准库**，无需 pip 安装任何东西
 - 有 `git` 时用浅克隆；没有会自动回退 zipball
 - 可选：`GITHUB_TOKEN` 环境变量（把 API 配额从 60/h 提到 5000/h）。没有也能跑，但要在报告里声明抽样限制
+- 在线审计开始前运行 `python "$SKILL_DIR/scripts/check-updates.py"`，发现新版应提醒用户；网络失败只说明未验证。用户要求离线时不执行更新检查，`--local` 默认也不会联网。
 
 ## 执行流程
 
@@ -54,7 +55,7 @@ python "$SKILL_DIR/scripts/github-inspector.py" "<仓库URL>" --out ./audit-<rep
 - `audit-<repo>/summary.txt` — 一屏摘要，先读这个
 - `audit-<repo>/repo/` — 浅克隆源码，后续要读它
 
-大仓库（>8000 文件）分批处理：
+大仓库可限制静态扫描规模（只影响下载后的文件遍历，不减少克隆体积，也不提供自动分页）：
 ```bash
 python "$SKILL_DIR/scripts/github-inspector.py" "<URL>" --out ./audit-x --max-files 3000 --stage analyze
 ```
@@ -79,7 +80,7 @@ python "$SKILL_DIR/scripts/github-inspector.py" "<URL>" --out ./audit-x --max-fi
 | 维度 | 参考文件 | 最低要求 |
 |---|---|---|
 | 结构与架构 | `inspection-standards.md` | 画出模块地图，指出耦合/重复/死代码 |
-| Bug 与代码质量 | `code-quality.md` | 至少 3 个带行号的具体问题，区分 [确认]/[疑似]/[建议] |
+| Bug 与代码质量 | `code-quality.md` | 仅报告真实发现并给出行号，区分 [确认]/[疑似]/[建议]；没有发现时明确说明，不凑问题数量 |
 | 安全 | `security-audit.md` | 读过脚本给出的高危命中并复核数据流，判断真实性 |
 | 性能 | `performance-audit.md` | 只写静态可判定的瓶颈，**未实测不得给数字** |
 | UI/UX | `ui-ux-audit.md` | 无界面则写"不适用+权重处理方式" |
@@ -141,7 +142,7 @@ python "$SKILL_DIR/scripts/report-validator.py" "体检报告/GitHub-xxx-体检�
 
 用 `present_files` 展示 Markdown 报告（若同时生成了 HTML，放第一个）。回复里给：
 1. 总分与等级
-2. 最该先修的 3 件事（带文件名）
+2. 最该先修的实际问题（最多 3 件，带文件名；无问题则明确说明）
 3. 报告路径
 4. 明确说明哪些维度未验证
 
@@ -167,7 +168,7 @@ README / 安装说明 / 开发环境 / 构建脚本 / 测试 / CI / 自动发版
 | API 403 且 `X-RateLimit-Remaining: 0` | 匿名限流。降低 `--budget`，或让用户设置 `GITHUB_TOKEN`；报告中声明抽样 |
 | 仓库 404 | 不存在或私有。私有需用户授权，不绕过 |
 | `git clone` 失败 | 脚本自动回退 zipball；都失败则转 API-only，并在报告注明无代码层证据 |
-| 仓库过大克隆超时 | `--max-files 3000` + 分模块多次运行 |
+| 仓库过大克隆超时 | 先自行准备本地源码副本，再用 `--local` 按子目录检查；`--max-files` 只限制静态遍历，不减少下载 |
 | 依赖无 lockfile | 依赖漏洞维度标"未充分验证"，不得给"安全"结论 |
 | 找不到 5 个竞品 | 说明检索词与失败原因，**不许编造项目** |
 

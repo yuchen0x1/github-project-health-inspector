@@ -13,12 +13,12 @@ github-inspector.py — GitHub 项目全方位体检 · 数据采集器
 用法
   python github-inspector.py https://github.com/owner/repo
   python github-inspector.py owner/repo --out ./out --stage analyze
-  python github-inspector.py <url> --token $GITHUB_TOKEN --keep-clone
+  python github-inspector.py <url> --token $GITHUB_TOKEN
 
 输出
   <out>/inspector-data.json   结构化数据（供模型消费）
   <out>/summary.txt           人类可读摘要（供快速掌握全局）
-  <out>/repo/                 浅克隆源码（--keep-clone 时保留）
+  <out>/repo/                 浅克隆源码（始终保留，供人工复核）
 """
 
 import argparse
@@ -28,6 +28,7 @@ import json
 import os
 import re
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
@@ -39,8 +40,8 @@ from collections import Counter, defaultdict
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-VERSION = "1.0.0"
-UA = "github-project-health-inspector/1.0 (+https://workbuddy.cn)"
+VERSION = "1.0.1"
+UA = "github-project-health-inspector/%s (+https://workbuddy.cn)" % VERSION
 API = "https://api.github.com"
 
 # ---------------------------------------------------------------------------
@@ -162,7 +163,10 @@ FRAMEWORK_SIGNATURES = {
     "prisma": "Prisma", "mongoose": "Mongoose", "sequelize": "Sequelize",
     "typeorm": "TypeORM", "react-native": "React Native", "expo": "Expo",
     "three": "Three.js", "chart.js": "Chart.js", "echarts": "ECharts",
-    "@modelcontextprotocol/sdk": "MCP SDK", "langchain": "LangChain.js",
+    "@modelcontextprotocol/sdk": "MCP SDK",
+    # 注意：langchain 在上面的 python 段已映射为 "LangChain"，此处不能再写一次
+    # （同一 dict 里重复 key 会让前一个值被静默覆盖）。langchain.js 的识别
+    # 靠 npm 依赖名 "langchain" 命中原 key 的 label，无需单独条目。
     # go / rust / java / php / ruby
     "gin-gonic/gin": "Gin", "labstack/echo": "Echo", "gofiber/fiber": "Fiber",
     "actix-web": "Actix Web", "axum": "Axum", "tokio": "Tokio", "tauri-build": "Tauri",
@@ -258,8 +262,13 @@ TEST_FILE_RE = re.compile(r"(_test\.go|\.test\.[jt]sx?|\.spec\.[jt]sx?|^test_.*\
 TODO_RE = re.compile(r"\b(TODO|FIXME|HACK|XXX|BUG|OPTIMIZE|REFACTOR)\b[:\s]*(.{0,120})", re.I)
 COMMENTED_CODE_RE = re.compile(r"^\s*(#|//)\s*(if|for|while|return|def|function|const|let|var|class|import|from|public|private)\b")
 
+# 跳过"文档/示例/测试夹具"里的凭据扫描。必须按路径段匹配：
+# 旧写法用裸 `test|spec|mock` 子串，会把 inspector.py（含 "spec"）、latest.py（含 "test"）
+# 这类真实源码整体跳过，等于对它们关闭了密钥扫描。
 IGNORE_SECRET_FILES = re.compile(
-    r"(\.example|\.sample|\.template|\.dist|\.md$|\.txt$|test|spec|mock|fixture|__tests__|docs?/)", re.I)
+    r"(\.example$|\.sample$|\.template$|\.dist$|\.md$|\.rst$|\.txt$"
+    r"|(^|/)(docs?|examples?|samples?|demos?|fixtures?|__tests__|tests?|specs?|testdata|benchmarks?)(/|$)"
+    r"|(^|/)[^/]*(_test|\.test|_spec|\.spec)\.[A-Za-z0-9]+$)", re.I)
 
 # ---------------------------------------------------------------------------
 # 基础工具
@@ -271,7 +280,16 @@ LOG_LINES = []
 def log(msg, level="INFO"):
     line = "[%s] %s" % (level, msg)
     LOG_LINES.append(line)
-    print(line, file=sys.stderr)
+    safe_print(line, file=sys.stderr)
+
+
+def safe_print(text, file=None):
+    stream = file or sys.stdout
+    try:
+        print(text, file=stream)
+    except UnicodeEncodeError:
+        enc = getattr(stream, "encoding", None) or "ascii"
+        print(text.encode(enc, "backslashreplace").decode(enc), file=stream)
 
 
 def now_iso():
@@ -280,12 +298,11 @@ def now_iso():
 
 def read_text(path, limit=2_000_000):
     try:
-        data = Path(path).read_bytes()
+        with Path(path).open("rb") as stream:
+            data = stream.read(limit)
     except Exception:
         return None
-    if len(data) > limit:
-        data = data[:limit]
-    for enc in ("utf-8", "utf-8-sig", "gbk", "latin-1"):
+    for enc in ("utf-8-sig", "utf-8", "gbk", "latin-1"):
         try:
             return data.decode(enc)
         except UnicodeDecodeError:
@@ -334,9 +351,12 @@ class GitHubAPI:
             h["Authorization"] = "Bearer " + self.token
         return h
 
-    def get(self, path, params=None, allow_fail=True):
+    def get(self, path, params=None):
         """GET api.github.com/<path>。失败返回 dict(status, error)，不抛异常。"""
         url = path if path.startswith("http") else API + path
+        parsed_url = urllib.parse.urlparse(url)
+        if parsed_url.scheme != "https" or parsed_url.netloc != "api.github.com":
+            return {"status": -1, "data": None, "error": "refusing non-GitHub API URL"}
         if params:
             url += "?" + urllib.parse.urlencode(params)
         if url in self.cache:
@@ -381,8 +401,6 @@ class GitHubAPI:
             elif e.code in (401,):
                 hint = "unauthorized: token invalid or expired"
             out = {"status": e.code, "data": None, "error": hint or txt, "raw": txt}
-            if not allow_fail and e.code != 404:
-                pass
         except Exception as e:  # noqa: BLE001
             out = {"status": -1, "data": None, "error": str(e)[:200]}
         self.cache[url] = out
@@ -418,98 +436,126 @@ def parse_repo_url(raw):
     # owner/repo
     if re.fullmatch(r"[A-Za-z0-9_.\-]+/[A-Za-z0-9_.\-]+", s):
         owner, repo = s.split("/")
-        return {"owner": owner, "repo": repo.rstrip(".git"), "ref": None,
+        # 只能用 re.sub 去掉结尾 ".git"；rstrip(".git") 会把 latest/testing 之类
+        # 以 g/t/i/. 结尾的仓库名截断成 lates/testin。
+        repo = re.sub(r"\.git$", "", repo)
+        if owner in (".", "..") or repo in ("", ".", ".."):
+            raise ValueError("invalid owner/repo")
+        return {"owner": owner, "repo": repo, "ref": None,
                 "host": "github.com", "input": raw}
     if not re.match(r"^https?://", s):
         s = "https://" + s
     u = urllib.parse.urlparse(s)
     host = (u.netloc or "").lower()
+    if host not in ("github.com", "www.github.com"):
+        # 之前会带着 gitlab.com 的 owner/repo 去 clone github.com/owner/repo，
+        # 悄悄分析成另一个仓库。宁可报错也不给错仓库的结论。
+        raise ValueError("仅支持 github.com 仓库，收到 host=%s" % (host or "?"))
     parts = [p for p in u.path.split("/") if p]
     if len(parts) < 2:
         raise ValueError("cannot parse owner/repo from URL: %s" % raw)
-    owner, repo = parts[0], parts[1]
+    owner, repo = [urllib.parse.unquote(part) for part in parts[:2]]
+    repo = re.sub(r"\.git$", "", repo)
+    if not all(re.fullmatch(r"[A-Za-z0-9_.\-]+", part) and part not in (".", "..")
+               for part in (owner, repo)):
+        raise ValueError("invalid owner/repo in URL")
     ref = None
     if len(parts) >= 4 and parts[2] in ("tree", "blob", "commit"):
-        ref = parts[3]
-    return {"owner": owner, "repo": re.sub(r"\.git$", "", repo), "ref": ref,
+        ref = urllib.parse.unquote("/".join(parts[3:]) if parts[2] != "commit" else parts[3])
+        if any(ord(c) < 32 for c in ref):
+            raise ValueError("invalid control character in ref")
+    return {"owner": owner, "repo": repo, "ref": ref,
             "host": host, "input": raw}
+
+
+def resolve_repo_ref(parsed, api):
+    """Resolve branch names containing slashes before stripping a URL's subpath."""
+    ref = parsed.get("ref")
+    if not ref or "/" not in ref:
+        return ref
+    parts = ref.split("/")
+    for length in range(min(len(parts), 16), 0, -1):
+        candidate = "/".join(parts[:length])
+        result = api.get("/repos/%s/%s/commits/%s" % (
+            parsed["owner"], parsed["repo"], urllib.parse.quote(candidate, safe="")))
+        if result.get("status") == 200:
+            return candidate
+        if result.get("status") != 404:
+            break
+    raise ValueError("无法确认 URL 的分支/提交（含斜杠的 ref 或源码路径）：%s" % ref)
 
 
 # ---------------------------------------------------------------------------
 # 获取源码：git clone 优先，失败回退 zipball
 # ---------------------------------------------------------------------------
 
-def force_rmtree(path):
-    """Windows 上 .git 里的只读文件会让 rmtree 静默失败，这里先解除只读再删。"""
-    import stat as _stat
-
-    def onerr(func, p, exc):
-        try:
-            os.chmod(p, _stat.S_IWRITE)
-            func(p)
-        except Exception:
-            pass
-
-    try:
-        shutil.rmtree(str(path), onerror=onerr)
-    except Exception:
-        pass
-    return not Path(path).exists()
-
-
 def fetch_source(parsed, dest, ref=None, timeout=600):
+    dest = Path(dest)
     info = {"method": None, "ok": False, "error": None, "path": str(dest), "ref": ref,
             "size_mb": None, "commit": None}
-    url = "https://github.com/%s/%s.git" % (parsed["owner"], parsed["repo"])
-    if have_cmd("git"):
-        cmd = ["git", "clone", "--depth", "1", "--single-branch", "--no-tags"]
-        if ref:
-            cmd += ["--branch", ref]
-        cmd += [url, str(dest)]
-        t0 = time.time()
-        rc, out, err = run_cmd(cmd, timeout=timeout)
-        info["elapsed_s"] = round(time.time() - t0, 1)
-        if rc == 0:
-            info.update(method="git-clone", ok=True)
-            rc2, out2, _ = run_cmd(["git", "rev-parse", "HEAD"], cwd=str(dest), timeout=30)
-            if rc2 == 0:
-                info["commit"] = out2.strip()
-            rc3, out3, _ = run_cmd(["git", "rev-parse", "--abbrev-ref", "HEAD"], cwd=str(dest), timeout=30)
-            if rc3 == 0:
-                info["branch"] = out3.strip()
-            info["size_mb"] = round(dir_size(dest) / 1048576, 2)
-            return info
-        info["error"] = (err or out or "").strip()[:400]
-        log("git clone 失败：%s（尝试 zipball 回退）" % info["error"][:120], "WARN")
-
-    # 回退：codeload zipball
-    branch = ref or "HEAD"
-    zb_url = "https://codeload.github.com/%s/%s/zip/refs/heads/%s" % (
-        parsed["owner"], parsed["repo"], branch)
-    if branch == "HEAD":
-        zb_url = "https://codeload.github.com/%s/%s/zip/HEAD" % (parsed["owner"], parsed["repo"])
+    if dest.exists() or dest.is_symlink():
+        info["error"] = "拒绝覆盖现有源码目录：%s" % dest
+        return info
     try:
         import io
         import zipfile
-        req = urllib.request.Request(zb_url, headers={"User-Agent": UA})
-        with urllib.request.urlopen(req, timeout=timeout) as r:
-            blob = r.read()
-        zf = zipfile.ZipFile(io.BytesIO(blob))
-        # 解压到独立临时目录，再把唯一的顶层目录搬成 dest，避免与已存在目录冲突
-        tmp = dest.parent / (dest.name + "-unzip")
-        force_rmtree(tmp)
-        tmp.mkdir(parents=True, exist_ok=True)
-        zf.extractall(str(tmp))
-        entries = [p for p in tmp.iterdir() if p.is_dir()]
-        src = entries[0] if len(entries) == 1 else tmp
-        if dest.exists():
-            force_rmtree(dest)
-        if src == tmp:
-            shutil.move(str(tmp), str(dest))
-        else:
-            shutil.move(str(src), str(dest))
-            force_rmtree(tmp)
-        info.update(method="zipball", ok=True, size_mb=round(dir_size(dest) / 1048576, 2))
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        # All cleanup is confined to a directory created by this invocation.
+        with tempfile.TemporaryDirectory(prefix=".inspector-source-", dir=str(dest.parent)) as work:
+            staging = Path(work) / "repo"
+            url = "https://github.com/%s/%s.git" % (parsed["owner"], parsed["repo"])
+            if have_cmd("git"):
+                cmd = ["git", "clone", "--depth", "1", "--single-branch", "--no-tags"]
+                if ref:
+                    cmd += ["--branch", ref]
+                cmd += ["--", url, str(staging)]
+                t0 = time.time()
+                rc, out, err = run_cmd(cmd, timeout=timeout)
+                info["elapsed_s"] = round(time.time() - t0, 1)
+                if rc == 0:
+                    rc2, out2, _ = run_cmd(["git", "rev-parse", "HEAD"], cwd=str(staging), timeout=30)
+                    if rc2 == 0:
+                        info["commit"] = out2.strip()
+                    rc3, out3, _ = run_cmd(["git", "rev-parse", "--abbrev-ref", "HEAD"], cwd=str(staging), timeout=30)
+                    if rc3 == 0:
+                        info["branch"] = out3.strip()
+                    if dest.exists() or dest.is_symlink():
+                        raise ValueError("目标目录已存在，已保留：%s" % dest)
+                    staging.rename(dest)
+                    info.update(method="git-clone", ok=True,
+                                size_mb=round(dir_size(dest) / 1048576, 2))
+                    return info
+                info["error"] = (err or out or "").strip()[:400]
+                log("git clone 失败：%s（尝试 zipball 回退）" % info["error"][:120], "WARN")
+
+            zb_url = "https://codeload.github.com/%s/%s/zip/%s" % (
+                parsed["owner"], parsed["repo"], urllib.parse.quote(ref or "HEAD", safe=""))
+            req = urllib.request.Request(zb_url, headers={"User-Agent": UA})
+            max_download = 128 * 1024 * 1024
+            with urllib.request.urlopen(req, timeout=timeout) as r:
+                blob = r.read(max_download + 1)
+            if len(blob) > max_download:
+                raise ValueError("源码 ZIP 超过 128 MiB 下载上限")
+            tmp = Path(work) / "archive"
+            tmp.mkdir()
+            with zipfile.ZipFile(io.BytesIO(blob)) as zf:
+                members = zf.infolist()
+                if len(members) > 100_000 or sum(m.file_size for m in members) > 512 * 1024 * 1024:
+                    raise ValueError("源码 ZIP 超过文件数或 512 MiB 展开上限")
+                for member in members:
+                    path = member.filename.replace("\\", "/")
+                    pieces = path.rstrip("/").split("/")
+                    mode = member.external_attr >> 16
+                    if (not path or path.startswith("/") or any(p in ("", ".", "..") for p in pieces)
+                            or any(":" in p for p in pieces) or stat.S_ISLNK(mode)):
+                        raise ValueError("源码 ZIP 包含不安全路径或符号链接")
+                zf.extractall(str(tmp))
+            entries = list(tmp.iterdir())
+            src = entries[0] if len(entries) == 1 and entries[0].is_dir() else tmp
+            if dest.exists() or dest.is_symlink():
+                raise ValueError("目标目录已存在，已保留：%s" % dest)
+            src.rename(dest)
+            info.update(method="zipball", ok=True, size_mb=round(dir_size(dest) / 1048576, 2))
         return info
     except Exception as e:  # noqa: BLE001
         info["error"] = (info.get("error") or "") + " | zipball: %s" % str(e)[:200]
@@ -519,9 +565,11 @@ def fetch_source(parsed, dest, ref=None, timeout=600):
 def dir_size(path):
     total = 0
     for root, dirs, files in os.walk(str(path)):
-        dirs[:] = [d for d in dirs if d not in (".git",)]
+        dirs[:] = [d for d in dirs if d != ".git" and not _is_link(Path(root) / d)]
         for f in files:
             try:
+                if _is_link(Path(root) / f):
+                    continue
                 total += os.path.getsize(os.path.join(root, f))
             except OSError:
                 pass
@@ -532,28 +580,44 @@ def dir_size(path):
 # 文件遍历
 # ---------------------------------------------------------------------------
 
-def walk_files(root, max_files=8000, max_bytes_total=120 * 1024 * 1024):
+def _is_link(path):
+    try:
+        st = Path(path).lstat()
+        return stat.S_ISLNK(st.st_mode) or bool(getattr(st, "st_file_attributes", 0) & 0x400)
+    except OSError:
+        return True
+
+
+def walk_files(root, max_files=8000, max_bytes_total=120 * 1024 * 1024, exclude_paths=()):
     """返回 (files[list of dict], stats)。跳过 .git/依赖/构建目录。"""
     root = Path(root)
     files = []
     skipped_dirs = []
     size_total = 0
     truncated = False
+    excluded = {Path(path).resolve() for path in exclude_paths}
     for dirpath, dirnames, filenames in os.walk(str(root)):
         rel_dir = os.path.relpath(dirpath, str(root))
         keep = []
         for d in sorted(dirnames):
-            if d in SKIP_DIRS:
+            if d in SKIP_DIRS or _is_link(Path(dirpath) / d) or (Path(dirpath) / d).resolve() in excluded:
                 skipped_dirs.append(os.path.join(rel_dir, d).replace("\\", "/") if rel_dir != "." else d)
                 continue
             keep.append(d)
         dirnames[:] = keep
         for fn in sorted(filenames):
             fp = Path(dirpath) / fn
+            if _is_link(fp) or fp.resolve() in excluded:
+                continue
+            if len(files) >= max_files or size_total >= max_bytes_total:
+                truncated = True
+                break
             rel = os.path.relpath(str(fp), str(root)).replace("\\", "/")
             try:
                 st = fp.stat()
             except OSError:
+                continue
+            if not stat.S_ISREG(st.st_mode):
                 continue
             ext = fp.suffix.lower()
             if ext in (".pyc", ".pyo", ".o", ".obj", ".class", ".jar", ".so", ".dll",
@@ -600,18 +664,188 @@ GENERIC_TOPICS = {
 
 
 def _pep508(spec):
-    """解析一条 PEP 508 依赖声明 → (name, version_if_pinned, pinned, constraint)。"""
-    s = (spec or "").strip().strip("\"'").strip()
-    if not s or s.startswith(("#", "-", "git+", "http", "file:", ".")):
+    """解析一条依赖声明 → (name, version_if_pinned, pinned, constraint)。
+
+    允许没有版本号（裸包名也是一条依赖，只是无法查 CVE）；
+    允许 Poetry 的 `^1.2` / `~1.2` 前缀（旧实现只认 PEP 440 操作符，
+    会把 `httpx = "^0.27"` 整条丢掉）。
+    """
+    if not isinstance(spec, str):
         return None
-    m = re.match(r"^([A-Za-z0-9][A-Za-z0-9_.\-]*)\s*(?:\[[^\]]*\])?\s*"
-                 r"(===|==|>=|<=|~=|!=|>|<)?\s*([0-9][A-Za-z0-9_.\-+]*)", s)
+    s = spec.strip().strip("\"'").strip()
+    # 用 scheme 前缀判定而非 startswith("http")：后者会把 httpx / httpcore / httpie
+    # 这些合法包名当成 URL 整条丢掉。
+    if not s or s.startswith(("#", "-")) or re.match(r"^(git\+|https?://|file:|\.{1,2}/)", s):
+        return None
+    m = re.match(r"^([A-Za-z0-9][A-Za-z0-9_.\-]*)\s*(?:\[[^\]]*\])?\s*(?:\(\s*)?"
+                 r"(\^|~=|~|===|==|>=|<=|!=|>|<)?\s*([0-9][A-Za-z0-9_.*!\-+]*)?", s)
     if not m:
         return None
     name, op, ver = m.group(1), m.group(2), m.group(3) or ""
-    pinned = op in ("==", "===") and bool(ver)
+    if name.lower() in PYPROJECT_NON_DEPS:
+        return None
+    pinned = op in ("==", "===") and bool(ver) and "*" not in ver
     constraint = ("%s%s" % (op, ver)) if op else ""
     return name, (ver if pinned else ""), pinned, constraint
+
+
+# pyproject.toml 里哪些表装的是"依赖"，以及是数组还是 name=constraint 映射
+PYPROJECT_ARRAY_TABLES = {
+    "project": ("dependencies",),                 # PEP 621 主依赖
+    "project.optional-dependencies": None,        # 任意 key 都是数组
+    "dependency-groups": None,                    # PEP 735
+    "tool.pdm.dev-dependencies": None,
+    "build-system": ("requires",),
+}
+PYPROJECT_MAP_TABLES = (
+    "tool.poetry.dependencies",
+    "tool.poetry.dev-dependencies",
+)
+PYPROJECT_NON_DEPS = {"python", "requires-python", "version", "name", "description",
+                      "readme", "license", "authors", "keywords", "classifiers",
+                      "include", "exclude", "type", "requires"}
+
+
+def _pyproject_map_entry(value):
+    """Poetry 映射表的一行 → 约束字符串（str / list / {version=...}）。"""
+    if isinstance(value, str):
+        return value
+    if isinstance(value, dict):
+        v = value.get("version")
+        return v if isinstance(v, str) else ""
+    if isinstance(value, list):
+        return _pyproject_map_entry(value[0]) if value else ""
+    return ""
+
+
+def _poetry_spec(name, value):
+    constraint = _pyproject_map_entry(value).strip()
+    # A bare Poetry version is exact, unlike a bare PEP 508 name.
+    if re.fullmatch(r"\d+[A-Za-z0-9_.!+\-]*", constraint):
+        constraint = "==" + constraint
+    return name + constraint
+
+
+def _pyproject_add(out, spec, table):
+    p = _pep508(spec)
+    if p and p[0].lower() not in PYPROJECT_NON_DEPS:
+        out.append({"name": p[0], "version": p[1], "pinned": p[2],
+                    "constraint": p[3], "table": table})
+
+
+def _pyproject_deps_tomllib(txt):
+    import tomllib
+    data = tomllib.loads(txt)
+    out = []
+    project = data.get("project") or {}
+    for spec in project.get("dependencies") or []:
+        _pyproject_add(out, spec, "project.dependencies")
+    for group, specs in (project.get("optional-dependencies") or {}).items():
+        for spec in specs or []:
+            _pyproject_add(out, spec, "project.optional-dependencies.%s" % group)
+    for group, specs in (data.get("dependency-groups") or {}).items():
+        for spec in specs or []:
+            if isinstance(spec, str):
+                _pyproject_add(out, spec, "dependency-groups.%s" % group)
+    pdm_dev = (((data.get("tool") or {}).get("pdm") or {}).get("dev-dependencies") or {})
+    for group, specs in pdm_dev.items():
+        for spec in specs or []:
+            if isinstance(spec, str):
+                _pyproject_add(out, spec, "tool.pdm.dev-dependencies.%s" % group)
+    for spec in (data.get("build-system") or {}).get("requires") or []:
+        _pyproject_add(out, spec, "build-system.requires")
+    poetry = ((data.get("tool") or {}).get("poetry") or {})
+    tables = [("dependencies", poetry.get("dependencies")),
+              ("dev-dependencies", poetry.get("dev-dependencies"))]
+    for group, body in (poetry.get("group") or {}).items():
+        tables.append(("group.%s.dependencies" % group, (body or {}).get("dependencies")))
+    for table, body in tables:
+        for name, value in (body or {}).items():
+            if name.lower() in PYPROJECT_NON_DEPS:
+                continue
+            _pyproject_add(out, _poetry_spec(name, value),
+                           "tool.poetry." + table)
+    return out
+
+
+def _pyproject_deps_fallback(txt):
+    """Python < 3.11 无 tomllib 时的行级解析：只在依赖表/依赖数组内取包名。
+
+    旧实现是对整份文件跑正则，会把 requires-python / classifiers / keywords
+    当成依赖（如包名 `requires-python`），污染依赖清单和 OSV 查询。
+    """
+    def strip_comment(line):
+        return re.sub(r'''"(?:\\.|[^"\\])*"|'[^']*'|\#.*''',
+                      lambda match: "" if match.group(0).startswith("#") else match.group(0), line)
+
+    def array_strings(text):
+        depth, objects, values = 0, 0, []
+        for match in re.finditer(r'''"(?:\\.|[^"\\])*"|'[^']*'|[\[\]{}]''', text):
+            token = match.group(0)
+            if token == "[":
+                depth += 1
+            elif token == "]":
+                depth -= 1
+                if depth == 0:
+                    return values
+            elif token == "{":
+                objects += 1
+            elif token == "}":
+                objects -= 1
+            elif depth == 1 and objects == 0:
+                try:
+                    values.append(json.loads(token) if token.startswith('"') else token[1:-1])
+                except ValueError:
+                    pass
+        return None
+
+    out, sec, buf, in_array, array_table = [], "", [], False, ""
+    for raw in txt.splitlines():
+        line = strip_comment(raw)
+        if in_array:
+            buf.append(line)
+            specs = array_strings(" ".join(buf))
+            if specs is not None:
+                for s in specs:
+                    _pyproject_add(out, s, array_table)
+                buf, in_array = [], False
+            continue
+        m = re.match(r"^\s*\[\[?([^\]]+)\]\]?\s*$", line)
+        if m:
+            sec = m.group(1).strip()
+            continue
+        if sec in PYPROJECT_ARRAY_TABLES:
+            allowed = PYPROJECT_ARRAY_TABLES[sec]
+            m = re.match(r"^\s*([A-Za-z0-9_.\-\"]+)\s*=\s*\[(.*)$", line)
+            if not m:
+                continue
+            key = m.group(1).strip("\"'")
+            if allowed is not None and key not in allowed:
+                continue
+            rest = m.group(2)
+            specs = array_strings("[" + rest)
+            if specs is not None:
+                for s in specs:
+                    _pyproject_add(out, s, "%s.%s" % (sec, key))
+            else:
+                buf, in_array, array_table = ["[" + rest], True, "%s.%s" % (sec, key)
+        elif sec in PYPROJECT_MAP_TABLES or re.match(r"^tool\.poetry\.group\.[^.]+\.dependencies$", sec):
+            m = re.match(r"^\s*([A-Za-z0-9_.\-]+)\s*=\s*(.+)$", line)
+            if not m or m.group(1).lower() in PYPROJECT_NON_DEPS:
+                continue
+            raw_val = m.group(2).strip()
+            # 内联表 {version = "^1.8", optional = true} 要单独取 version
+            inner = re.search(r"version\s*=\s*[\"']([^\"']+)[\"']", raw_val)
+            val = inner.group(1) if inner else raw_val.strip("\"',")
+            _pyproject_add(out, _poetry_spec(m.group(1), val), sec)
+    return out
+
+
+def parse_pyproject_deps(txt):
+    try:
+        return _pyproject_deps_tomllib(txt)
+    except Exception:
+        return _pyproject_deps_fallback(txt)
 
 
 def _dep_scope(src):
@@ -637,6 +871,8 @@ def collect_manifest_deps(root, files):
     def add(eco, name, ver, src, pinned, constraint="", direct=True):
         if not name or not isinstance(name, str) or len(name) > 120:
             return
+        if not isinstance(ver, str):
+            ver = ""
         raw.append({"ecosystem": eco, "name": name.strip(), "version": (ver or "").strip(),
                     "source_file": src, "pinned": bool(pinned and ver), "constraint": constraint,
                     "scope": _dep_scope(src), "direct": direct})
@@ -660,7 +896,7 @@ def collect_manifest_deps(root, files):
                     if not p or "node_modules/" not in p:
                         continue
                     nm = p.split("node_modules/")[-1]
-                    v = (meta or {}).get("version")
+                    v = meta.get("version") if isinstance(meta, dict) else None
                     if v:
                         add("npm", nm, v, rel, True)
             elif isinstance(j, dict) and isinstance(j.get("dependencies"), dict):
@@ -688,8 +924,9 @@ def collect_manifest_deps(root, files):
             if isinstance(j, dict):
                 for sec in ("default", "develop"):
                     for n, meta in (j.get(sec) or {}).items():
-                        v = str((meta or {}).get("version", "")).lstrip("=")
-                        add("PyPI", n, v, rel, bool(v))
+                        spec = _pep508(n + str(meta.get("version", ""))) if isinstance(meta, dict) else None
+                        if spec:
+                            add("PyPI", n, spec[1], rel, spec[2], spec[3])
         elif b == "poetry.lock":
             txt = read_text(root / rel) or ""
             for blk in txt.split("[[package]]")[1:]:
@@ -763,7 +1000,8 @@ def collect_manifest_deps(root, files):
             for line in txt.splitlines():
                 m = re.match(r"^\s*-\s*([A-Za-z0-9_.\-]+)=([\w.\-]+)", line)
                 if m:
-                    add("PyPI", m.group(1), m.group(2), rel, True)
+                    # Conda build versions are not PyPI versions; keep them unverified.
+                    add("Conda", m.group(1), "", rel, False, m.group(2))
 
     # ---------- 3. go.mod（MVS 选出的最小版本，等价于实际构建版本） ----------
     for rel in rel_list:
@@ -788,25 +1026,8 @@ def collect_manifest_deps(root, files):
                     add("npm", n, v if exact else "", rel, exact, v)
         elif b == "pyproject.toml":
             txt = read_text(root / rel) or ""
-            # PEP 621 dependencies 数组 / Poetry dependencies 表
-            # PEP 621 dependencies 数组元素（行首引号），避免把 name = "flask" 当成依赖
-            for m in re.finditer(r"^\s*[\"']([A-Za-z0-9][A-Za-z0-9_.\-]*)\s*"
-                                 r"(===|==|>=|<=|~=|!=|>|<)?\s*([0-9][A-Za-z0-9_.\-+]*)?"
-                                 r"\s*(?:\[[^\]]*\])?\s*[\"']", txt, re.M):
-                name, op, ver = m.group(1), m.group(2), m.group(3) or ""
-                if name.lower() in ("python", "readme", "license", "version", "name",
-                                    "description", "authors", "keywords", "include", "exclude"):
-                    continue
-                pinned = op in ("==", "===") and bool(ver)
-                add("PyPI", name, ver if pinned else "", rel, pinned,
-                    ("%s%s" % (op, ver)).strip() if op else "")
-            for m in re.finditer(r"^\s*([A-Za-z0-9][A-Za-z0-9_.\-]*)\s*=\s*[\"']([\^~>=<!\s]*[\d][\w.\-+]*)[\"']",
-                                 txt, re.M):
-                name, c = m.group(1), m.group(2).strip()
-                if name.lower() in ("python", "version"):
-                    continue
-                exact = bool(re.fullmatch(r"=?\d+\.\d+\.\d+[\w.\-+]*", c))
-                add("PyPI", name, c.lstrip("=") if exact else "", rel, exact, c)
+            for d in parse_pyproject_deps(txt):
+                add("PyPI", d["name"], d["version"], rel, d["pinned"], d["constraint"])
         elif b == "Cargo.toml":
             txt = read_text(root / rel) or ""
             for m in re.finditer(r"^\s*([A-Za-z0-9_\-]+)\s*=\s*\{?[^\n]*?version\s*=\s*\"([^\"]+)\"", txt, re.M):
@@ -825,37 +1046,38 @@ def collect_manifest_deps(root, files):
             if isinstance(j, dict):
                 for key in ("require", "require-dev"):
                     for n, v in (j.get(key) or {}).items():
-                        if "/" in n and n.startswith(("php", "ext-")):
+                        if "/" not in n:
                             continue
                         exact = bool(re.fullmatch(r"v?\d+\.\d+\.\d+", str(v)))
                         add("Packagist", n, str(v).lstrip("v") if exact else "", rel, exact, str(v))
         elif b == "pubspec.yaml":
             txt = read_text(root / rel) or ""
             for m in re.finditer(r"^\s{2}([a-z_][a-z0-9_]*):\s*[\^~>=<]*\s*([\d][\w.\-+]*)", txt, re.M):
-                exact = "^" not in m.group(0)
+                exact = not re.search(r"[\^~><=]", m.group(0).split(":", 1)[1])
                 add("Pub", m.group(1), m.group(2) if exact else "", rel, exact, m.group(2))
 
-    # ---------- 合并：同一包优先保留 pinned 记录 ----------
-    best, order = {}, []
+    # Never promote example versions into project evidence or discard a second
+    # installed version: either would produce incorrect vulnerability results.
+    groups = {}
     for e in raw:
-        k = (e["ecosystem"], e["name"].lower())
-        if k not in best:
-            best[k] = e
-            order.append(k)
-        else:
-            cur = best[k]
-            if e["pinned"] and not cur["pinned"]:
-                e["constraint"] = e.get("constraint") or cur.get("constraint", "")
-                # 合并时不能丢掉"是否是直接依赖"这一信息
-                e["direct"] = bool(e.get("direct")) or bool(cur.get("direct"))
-                if cur.get("scope") == "project":
-                    e["scope"] = "project"
-                best[k] = e
-            elif not best[k].get("constraint") and e.get("constraint"):
-                best[k]["constraint"] = e["constraint"]
-            elif e.get("direct"):
-                best[k]["direct"] = True
-    return [best[k] for k in order]
+        name = e["name"].lower()
+        if e["ecosystem"] == "PyPI":
+            name = re.sub(r"[-_.]+", "-", name)
+        groups.setdefault((e["ecosystem"], name, e["scope"]), []).append(e)
+    merged = []
+    for entries in groups.values():
+        pinned = {}
+        for entry in entries:
+            if entry["pinned"]:
+                pinned.setdefault(entry["version"], entry)
+        selected = list(pinned.values()) or [entries[0]]
+        for entry in selected:
+            related = [e for e in entries if not e["pinned"] or e["version"] == entry["version"]]
+            entry["direct"] = any(e.get("direct") for e in related)
+            if not entry.get("constraint"):
+                entry["constraint"] = next((e["constraint"] for e in related if e.get("constraint")), "")
+            merged.append(entry)
+    return merged
 
 
 def detect_stack(root, files):
@@ -1377,8 +1599,8 @@ def analyze_security(root, files, stack):
         # --- 密钥 ---
         if not IGNORE_SECRET_FILES.search(rel):
             for name, pattern, sev in SECRET_PATTERNS:
-                for m in re.finditer(pattern, masked):
-                    ln = masked[:m.start()].count("\n") + 1
+                for m in re.finditer(pattern, txt):
+                    ln = txt[:m.start()].count("\n") + 1
                     snippet = lines[ln - 1].strip()[:140] if ln - 1 < len(lines) else ""
                     # 过滤明显的占位符与环境变量读取
                     if re.search(r"(os\.environ|process\.env|getenv|your[_-]?|xxx|\*\*\*|<.*>|\$\{)", snippet, re.I):
@@ -1387,7 +1609,7 @@ def analyze_security(root, files, stack):
                         continue
                     findings["secrets"].append({
                         "type": name, "severity": sev, "file": rel, "line": ln,
-                        "evidence": snippet[:100],
+                        "evidence": "[REDACTED: credential-like value]",
                         "note": "正则初筛命中，需人工确认是否为真实凭据（可能是测试样例/占位符）",
                     })
                     break
@@ -1506,13 +1728,15 @@ def osv_query(deps, max_pkgs=300, chunk=100):
     pinned = [d for d in deps if d.get("pinned") and d.get("version")]
     proj = [d for d in pinned if d.get("scope", "project") == "project"]
     ex = [d for d in pinned if d.get("scope") != "project"]
+    # 项目自身依赖排前，示例/测试目录排后。旧代码先算 (proj+ex) 又立刻用
+    # pinned[:max_pkgs] 覆盖，示例目录的包会挤掉项目自身的查询配额。
     targets = (proj + ex)[:max_pkgs]
-    result = {"queried": 0, "vulnerable_packages": [], "total_vulns": 0,
+    result = {"queried": 0, "project_queried_count": 0, "example_queried_count": 0,
+              "vulnerable_packages": [], "total_vulns": 0,
               "project_pinned_count": len(proj), "example_pinned_count": len(ex),
               "unpinned_packages": len(deps) - len(pinned),
               "ecosystems": sorted({d["ecosystem"] for d in deps}),
               "method": "OSV.dev /v1/querybatch（按确切版本查询）"}
-    targets = pinned[:max_pkgs]
     for i in range(0, len(targets), chunk):
         batch = targets[i:i + chunk]
         payload = {"queries": [{"package": {"name": d["name"], "ecosystem": d["ecosystem"]},
@@ -1524,8 +1748,15 @@ def osv_query(deps, max_pkgs=300, chunk=100):
                 headers={"Content-Type": "application/json", "User-Agent": UA})
             with urllib.request.urlopen(req, timeout=60) as r:
                 res = json.loads(r.read().decode("utf-8", "ignore"))
+            items = res.get("results") if isinstance(res, dict) else None
+            if not isinstance(items, list) or len(items) != len(batch) or any(not isinstance(x, dict) for x in items):
+                raise ValueError("OSV returned an incomplete or invalid batch")
+            if any(item.get("next_page_token") for item in items):
+                raise ValueError("OSV returned paginated results; coverage is incomplete")
             result["queried"] += len(batch)
-            for dep, item in zip(batch, res.get("results", [])):
+            result["project_queried_count"] += sum(1 for dep in batch if dep.get("scope", "project") == "project")
+            result["example_queried_count"] += sum(1 for dep in batch if dep.get("scope", "project") != "project")
+            for dep, item in zip(batch, items):
                 vulns = item.get("vulns") or []
                 if vulns:
                     ids = [v.get("id") for v in vulns if v.get("id")]
@@ -1542,19 +1773,27 @@ def osv_query(deps, max_pkgs=300, chunk=100):
             result["error"] = "OSV query failed: %s" % str(e)[:160]
             break
     result["vulnerable_packages"].sort(key=lambda x: (x["scope"] != "project", -x["vuln_count"]))
-    result["vulnerable_packages"] = result["vulnerable_packages"][:60]
+    # 先统计再截断：否则命中包超过 60 个时，note 里的数量会被截断后的列表少算
     proj_vulns = [v for v in result["vulnerable_packages"] if v["scope"] == "project"]
+    result["project_vulnerable_count"] = len(proj_vulns)
+    result["example_vulnerable_count"] = len(result["vulnerable_packages"]) - len(proj_vulns)
+    result["complete"] = result["queried"] == len(pinned) and not result.get("error")
+    result["vulnerable_packages"] = result["vulnerable_packages"][:60]
     if result["project_pinned_count"] == 0:
         result["status"] = "unverified_project_scope"
         result["note"] = ("项目根目录没有锁文件/精确版本声明（只有范围约束），"
                           "无法确定实际安装版本，因此不能断言项目自身依赖是否存在已知 CVE。"
                           + (" 示例/测试目录中有 %d 个锁定版本，其漏洞仅供旁证，不代表项目本体。"
                              % result["example_pinned_count"] if result["example_pinned_count"] else ""))
+    elif result.get("error") or result["project_queried_count"] < len(proj):
+        result["status"] = "partial_findings" if proj_vulns else "unverified_incomplete"
+        result["note"] = ("仅成功查询 %d/%d 个项目自身锁定版本；查询失败或达到上限，不能给出无已知漏洞的结论。"
+                          % (result["project_queried_count"], len(proj)))
     elif not proj_vulns:
         result["status"] = "clean_on_queried_scope"
         result["note"] = ("已查询的 %d 个项目自身锁定版本未命中 OSV 已知漏洞；"
                           "这不等于无依赖风险（未锁定/传递依赖/dev 依赖未覆盖）。"
-                          % result["project_pinned_count"])
+                          % result["project_queried_count"])
     else:
         result["status"] = "findings"
         result["note"] = "项目自身依赖中有 %d 个包命中已知漏洞，需升级到 OSV 建议的修复版本。" % len(proj_vulns)
@@ -1565,7 +1804,7 @@ def osv_query(deps, max_pkgs=300, chunk=100):
 # GitHub 仓库健康度
 # ---------------------------------------------------------------------------
 
-def analyze_github(repo, api):
+def analyze_github(repo, api, metadata_only=False):
     full = "%s/%s" % (repo["owner"], repo["repo"])
     out = {"repo": full, "unavailable": []}
 
@@ -1599,6 +1838,12 @@ def analyze_github(repo, api):
         out["days_since_last_push"] = (now - pushed).days
     except Exception:
         pass
+
+    if metadata_only:
+        out["api_calls_used"] = api.calls
+        out["rate_limit"] = api.rate
+        out["unavailable"].append("GitHub health metrics (metadata-only stage)")
+        return out
 
     # 语言字节分布（官方统计，比本地估算更准）
     lg = api.get("/repos/%s/languages" % full)
@@ -2016,7 +2261,8 @@ def build_summary(data, out_path):
     dep = s.get("dependency_audit") or {}
     proj_v = [x for x in dep.get("vulnerable_packages", []) if x.get("scope") == "project"]
     A("依赖漏洞      : 项目自身 %s 个包 / 示例目录 %s 个包（查询 %s 个锁定版本，状态 %s）" % (
-        len(proj_v), len(dep.get("vulnerable_packages", [])) - len(proj_v),
+        dep.get("project_vulnerable_count", len(proj_v)),
+        dep.get("example_vulnerable_count", len(dep.get("vulnerable_packages", [])) - len(proj_v)),
         dep.get("queried", 0), dep.get("status", "-")))
     if local:
         A("")
@@ -2054,22 +2300,27 @@ def build_summary(data, out_path):
 
 def main():
     ap = argparse.ArgumentParser(description="GitHub 项目全方位体检 · 数据采集器")
+    ap.add_argument("--version", action="version", version=VERSION)
     ap.add_argument("target", nargs="?", help="GitHub 仓库 URL 或 owner/repo")
     ap.add_argument("--out", default="inspector-out", help="输出目录（默认 ./inspector-out）")
     ap.add_argument("--local", default=None,
                     help="改为审计本地目录（离线，不调用 GitHub API，仅做代码层分析）")
     ap.add_argument("--stage", default="all",
-                    choices=["all", "meta", "clone", "analyze", "github", "competitors"],
+                    choices=["all", "meta", "clone", "analyze", "github", "competitors", "repo", "code"],
                     help="分阶段执行")
     ap.add_argument("--token", default=None, help="GitHub Token（默认读 GITHUB_TOKEN/GH_TOKEN）")
     ap.add_argument("--workdir", default=None, help="克隆目录（默认 <out>/repo）")
-    ap.add_argument("--keep-clone", action="store_true", help="保留源码目录（默认保留在 out/repo）")
+    ap.add_argument("--keep-clone", action="store_true", help="兼容旧命令；源码始终保留")
     ap.add_argument("--no-clone", action="store_true", help="只走 API，不下载源码")
     ap.add_argument("--max-files", type=int, default=8000)
     ap.add_argument("--budget", type=int, default=80, help="API 调用预算（匿名限流 60/h）")
     ap.add_argument("--skip-osv", action="store_true", help="跳过依赖漏洞查询")
+    ap.add_argument("--allow-network", action="store_true", help="允许本地模式联网查询 OSV（默认离线）")
     ap.add_argument("--json-only", action="store_true", help="只打印 JSON 路径")
     args = ap.parse_args()
+    args.stage = {"repo": "meta", "code": "analyze"}.get(args.stage, args.stage)
+    if args.max_files < 1 or args.budget < 1:
+        ap.error("--max-files 和 --budget 必须为正整数")
 
     out_dir = Path(args.out).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -2087,32 +2338,35 @@ def main():
     if args.local:
         src_root = Path(args.local).resolve()
         if not src_root.is_dir():
-            print(json.dumps({"ok": False, "error": "本地目录不存在: %s" % src_root}, ensure_ascii=False))
+            safe_print(json.dumps({"ok": False, "error": "本地目录不存在: %s" % src_root}, ensure_ascii=False))
+            return 2
+        if out_dir == src_root:
+            safe_print(json.dumps({"ok": False, "error": "输出目录不能与待审计源码目录相同"}, ensure_ascii=False))
             return 2
         data["input"] = {"raw": str(src_root), "local": True, "repo": src_root.name}
         data["repository"] = {"local": True, "meta": {"full_name": src_root.name,
                                                       "default_branch": None},
                               "unavailable": ["all GitHub API metrics (local mode)"]}
         data["access"]["source_method"] = "local"
-        files, fstats = walk_files(src_root, max_files=args.max_files)
+        files, fstats = walk_files(src_root, max_files=args.max_files, exclude_paths=(out_dir,))
         data["access"]["files"] = fstats
         stack = detect_stack(src_root, files)
         structure = analyze_structure(src_root, files, stack)
         quality = analyze_quality(src_root, files, stack)
         security = analyze_security(src_root, files, stack)
-        security["dependency_audit"] = ({"status": "skipped", "note": "--skip-osv"}
-                                        if args.skip_osv else osv_query(stack["dependencies"]))
+        security["dependency_audit"] = ({"status": "skipped", "note": "--skip-osv 或本地离线模式；--allow-network 可联网查询"}
+                                        if args.skip_osv or not args.allow_network else osv_query(stack["dependencies"]))
         data.update({"stack": stack, "structure": structure,
                      "quality": quality, "security": security, "competitors": {"candidates": []}})
         out_json = out_dir / "inspector-data.json"
         out_json.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
         summary = build_summary(data, str(out_json))
         (out_dir / "summary.txt").write_text(summary, encoding="utf-8")
-        print(str(out_json) if args.json_only else summary)
+        safe_print(str(out_json) if args.json_only else summary)
         return 0
 
     if not args.target:
-        print(json.dumps({"ok": False, "error": "需要 GitHub URL / owner/repo，或使用 --local <目录>"},
+        safe_print(json.dumps({"ok": False, "error": "需要 GitHub URL / owner/repo，或使用 --local <目录>"},
                          ensure_ascii=False))
         return 2
 
@@ -2120,7 +2374,7 @@ def main():
     try:
         parsed = parse_repo_url(args.target)
     except ValueError as e:
-        print(json.dumps({"ok": False, "error": "URL 解析失败: %s" % e}, ensure_ascii=False))
+        safe_print(json.dumps({"ok": False, "error": "URL 解析失败: %s" % e}, ensure_ascii=False))
         return 2
     data["input"].update(parsed)
     log("目标仓库: %s/%s (ref=%s)" % (parsed["owner"], parsed["repo"], parsed["ref"]))
@@ -2128,32 +2382,52 @@ def main():
     api = GitHubAPI(token=args.token, budget=args.budget)
 
     # 2) 元数据
-    gh = analyze_github(parsed, api)
+    gh = analyze_github(parsed, api, metadata_only=args.stage not in ("all", "github"))
     data["repository"] = gh
     if gh.get("meta_error"):
         data["access"]["limitations"].append(
             "无法读取仓库元数据：%s。若为私有仓库，需要用户提供授权（Token）。" % gh["meta_error"])
         out_json = out_dir / "inspector-data.json"
         out_json.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
-        print(json.dumps({"ok": False, "stage": "meta", "error": gh["meta_error"],
+        safe_print(json.dumps({"ok": False, "stage": "meta", "error": gh["meta_error"],
                           "data": str(out_json)}, ensure_ascii=False))
         return 3
 
     meta = gh.get("meta", {})
     data["access"]["source_method"] = None
 
+    # --stage 的真正语义：只跑请求的那一段，其余跳过。
+    # 旧实现只判断了 competitors，`--stage analyze` 依旧跑完整流程（含克隆与竞品检索）。
+    if args.stage == "meta":
+        data["access"]["api_calls"] = api.calls
+        data["access"]["rate_limit"] = api.rate
+        data["access"]["limitations"].extend(api.notes)
+        out_json = out_dir / "inspector-data.json"
+        out_json.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+        summary = build_summary(data, str(out_json))
+        (out_dir / "summary.txt").write_text(summary, encoding="utf-8")
+        safe_print(str(out_json) if args.json_only else summary)
+        return 0
+
+    want_clone = args.stage in ("all", "clone", "analyze")
+    want_analyze = args.stage in ("all", "analyze")
+    want_competitors = args.stage in ("all", "competitors")
+
     stack, structure, quality, security = {}, {}, {}, {}
     src_root = None
 
     # 3) 源码
-    use_clone = not args.no_clone
-    if use_clone:
-        if clone_dir.exists() and not force_rmtree(clone_dir):
-            # Windows 下目录被占用/只读时的兜底：换一个唯一目录，不让整个代码层分析失败
-            clone_dir = out_dir / ("repo-" + datetime.now().strftime("%H%M%S"))
+    if want_clone and not args.no_clone:
+        if clone_dir.exists() or clone_dir.is_symlink():
+            import uuid
+            clone_dir = out_dir / ("repo-" + uuid.uuid4().hex[:12])
             data["access"]["limitations"].append(
-                "原克隆目录无法清理，已改用新目录 %s。" % clone_dir.name)
-        info = fetch_source(parsed, clone_dir, ref=parsed.get("ref") or meta.get("default_branch"))
+                "原克隆目录已存在并保留，已改用新目录 %s。" % clone_dir.name)
+        try:
+            ref = resolve_repo_ref(parsed, api) or meta.get("default_branch")
+            info = fetch_source(parsed, clone_dir, ref=ref)
+        except ValueError as error:
+            info = {"ok": False, "error": str(error), "method": None, "path": str(clone_dir)}
         data["access"]["clone"] = info
         data["access"]["source_method"] = info.get("method")
         if info["ok"]:
@@ -2162,11 +2436,14 @@ def main():
             data["access"]["limitations"].append(
                 "源码获取失败（git clone 与 zipball 均不可用）：%s。以下代码层分析缺失，"
                 "仅有 API 层数据。" % (info.get("error") or "")[:200])
+    elif not want_clone:
+        data["access"]["limitations"].append(
+            "本次仅执行 stage=%s，未克隆源码，无代码层证据。" % args.stage)
     else:
         data["access"]["limitations"].append("已指定 --no-clone，仅采集 API 数据，无代码层证据。")
 
     # 4) 代码层分析
-    if src_root:
+    if src_root and want_analyze:
         files, fstats = walk_files(src_root, max_files=args.max_files)
         data["access"]["files"] = fstats
         if fstats["truncated"]:
@@ -2183,13 +2460,14 @@ def main():
         data.update({"stack": stack, "structure": structure,
                      "quality": quality, "security": security})
     else:
+        if src_root and not want_analyze:
+            data["access"]["limitations"].append(
+                "本次仅执行 stage=%s，已克隆源码但未做代码层分析。" % args.stage)
         data.update({"stack": {}, "structure": {}, "quality": {}, "security": {}})
 
     # 5) 同类项目
-    comp = None
-    if args.stage in ("all", "competitors"):
-        comp = search_competitors(parsed, api, stack or {"languages": []}, meta)
-        data["competitors"] = comp
+    if want_competitors:
+        data["competitors"] = search_competitors(parsed, api, stack or {"languages": []}, meta)
 
     # 6) 汇总
     data["access"]["api_calls"] = api.calls
@@ -2210,9 +2488,9 @@ def main():
     (out_dir / "summary.txt").write_text(summary, encoding="utf-8")
 
     if args.json_only:
-        print(str(out_json))
+        safe_print(str(out_json))
     else:
-        print(summary)
+        safe_print(summary)
     return 0
 
 
